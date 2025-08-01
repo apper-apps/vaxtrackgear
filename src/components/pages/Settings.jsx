@@ -21,12 +21,19 @@ const handleSave = async () => {
     dispatch(setLoading(true));
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate brief processing time for user feedback
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Settings are already updated in Redux store via handleInputChange
-      dispatch(setLoading(false));
-      toast.success("Settings saved successfully");
+      // Ensure settings are saved to localStorage
+      try {
+        localStorage.setItem('vaxtrack-settings', JSON.stringify(settings));
+        dispatch(setLoading(false));
+        toast.success("Settings saved successfully");
+      } catch (storageError) {
+        console.error('Error saving settings to localStorage:', storageError);
+        dispatch(setLoading(false));
+        toast.error("Failed to save settings. Browser storage may be unavailable.");
+      }
     } catch (error) {
       dispatch(setLoading(false));
       toast.error("Failed to save settings. Please try again.");
