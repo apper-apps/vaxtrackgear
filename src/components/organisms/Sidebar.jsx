@@ -30,13 +30,11 @@ const Sidebar = ({ isOpen, onClose, className }) => {
       )}>
 <div className="flex items-center px-6 py-4 border-b border-gray-200">
           <div className="flex items-center">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-              <img 
-                src="https://pediatricshouston.com/wp-content/uploads/2024/07/littlebuddiespediatricsgreen.png" 
-                alt="Little Buddies Pediatrics Logo" 
-                className="h-6 w-6 object-contain" 
-              />
-            </div>
+            <img 
+              src="https://pediatricshouston.com/wp-content/uploads/2024/07/littlebuddiespediatricsgreen.png" 
+              alt="Little Buddies Pediatrics Logo" 
+              className="h-6 w-6 object-contain" 
+            />
             <div className="ml-3">
               <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
               <p className="text-xs text-gray-500">Vaccine Management</p>
@@ -65,13 +63,11 @@ const Sidebar = ({ isOpen, onClose, className }) => {
       )}>
 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-              <img 
-                src="https://pediatricshouston.com/wp-content/uploads/2024/07/littlebuddiespediatricsgreen.png" 
-                alt="Little Buddies Pediatrics Logo" 
-                className="h-6 w-6 object-contain" 
-              />
-            </div>
+            <img 
+              src="https://pediatricshouston.com/wp-content/uploads/2024/07/littlebuddiespediatricsgreen.png" 
+              alt="Little Buddies Pediatrics Logo" 
+              className="h-6 w-6 object-contain" 
+            />
             <div className="ml-3">
               <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
               <p className="text-xs text-gray-500">Vaccine Management</p>
