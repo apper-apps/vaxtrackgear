@@ -111,10 +111,9 @@ const Inventory = () => {
           }}
         />
       ) : (
-        <VaccineTable 
+<VaccineTable 
           vaccines={filteredVaccines} 
           onUpdateVaccine={handleUpdateVaccine}
-          showAdministration={true}
         />
       )}
     </div>

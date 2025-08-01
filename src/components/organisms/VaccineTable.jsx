@@ -13,12 +13,10 @@ import { getStockStatus } from "@/utils/vaccineUtils";
 const VaccineTable = ({ 
   vaccines = [], 
   onUpdateVaccine, 
-  showAdministration = false,
   className 
 }) => {
 const [sortBy, setSortBy] = useState("commercialName");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [adminDoses, setAdminDoses] = useState({});
 const [quantityEdits, setQuantityEdits] = useState({});
   const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null });
 
@@ -85,14 +83,13 @@ const [quantityEdits, setQuantityEdits] = useState({});
   const handlePasswordCancel = () => {
     setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
   };
-  const columns = [
+const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
     { key: "genericName", label: "Generic Name", sortable: true },
     { key: "lotNumber", label: "Lot Number", sortable: true },
     { key: "expirationDate", label: "Expiration Date", sortable: true },
     { key: "quantityOnHand", label: "Quantity On Hand", sortable: true },
-    { key: "status", label: "Status", sortable: false },
-    ...(showAdministration ? [{ key: "administration", label: "Administer", sortable: false }] : [])
+    { key: "status", label: "Status", sortable: false }
   ];
 
   const handleSort = (key, order) => {
@@ -100,41 +97,6 @@ const [quantityEdits, setQuantityEdits] = useState({});
     setSortOrder(order);
   };
 
-  const handleAdminChange = (vaccineId, value) => {
-    const numValue = parseInt(value) || 0;
-    setAdminDoses(prev => ({
-      ...prev,
-      [vaccineId]: numValue
-    }));
-  };
-
-  const handleAdminister = (vaccine) => {
-    const dosesToAdmin = adminDoses[vaccine.Id] || 0;
-    
-    if (dosesToAdmin <= 0) {
-      toast.error("Please enter a valid number of doses to administer");
-      return;
-    }
-    
-    if (dosesToAdmin > vaccine.quantityOnHand) {
-      toast.error("Cannot administer more doses than available in stock");
-      return;
-    }
-
-    const updatedVaccine = {
-      ...vaccine,
-      quantityOnHand: vaccine.quantityOnHand - dosesToAdmin,
-      administeredDoses: (vaccine.administeredDoses || 0) + dosesToAdmin
-    };
-
-    onUpdateVaccine(updatedVaccine);
-    setAdminDoses(prev => ({
-      ...prev,
-      [vaccine.Id]: 0
-    }));
-    
-    toast.success(`Successfully administered ${dosesToAdmin} doses of ${vaccine.commercialName}`);
-  };
 
   const sortedVaccines = [...vaccines].sort((a, b) => {
     let aValue = a[sortBy];
@@ -252,34 +214,6 @@ const [quantityEdits, setQuantityEdits] = useState({});
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(vaccine)}
                 </td>
-                {showAdministration && (
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {vaccine.quantityOnHand > 0 ? (
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          max={vaccine.quantityOnHand}
-                          value={adminDoses[vaccine.Id] || ""}
-                          onChange={(e) => handleAdminChange(vaccine.Id, e.target.value)}
-                          placeholder="0"
-                          className="w-20 text-center"
-                          size="sm"
-                        />
-                        <Button
-                          variant="accent"
-                          size="sm"
-                          onClick={() => handleAdminister(vaccine)}
-                          disabled={!adminDoses[vaccine.Id] || adminDoses[vaccine.Id] <= 0}
-                        >
-                          <ApperIcon name="Syringe" className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">Out of stock</span>
-                    )}
-                  </td>
-                )}
               </tr>
 ))}
           </tbody>
