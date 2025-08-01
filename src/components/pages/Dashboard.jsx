@@ -37,7 +37,7 @@ const Dashboard = () => {
     return <Error message={error} onRetry={loadVaccines} />;
   }
 
-  return (
+return (
     <div className="space-y-6">
       {/* Page Header */}
       <div>
@@ -48,11 +48,11 @@ const Dashboard = () => {
       {/* Metrics Overview */}
       <DashboardMetrics vaccines={vaccines} />
 
-      {/* Alerts Section */}
-      <InventoryAlerts vaccines={vaccines} />
-
       {/* Quick Actions */}
       <QuickActions />
+
+      {/* Alerts Section */}
+      <InventoryAlerts vaccines={vaccines} />
     </div>
   );
 };
