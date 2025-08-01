@@ -1,58 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import FormField from "@/components/molecules/FormField";
 import ApperIcon from "@/components/ApperIcon";
-
+import { 
+  setLoading, 
+  updateSettings, 
+  updateSingleSetting, 
+  resetSettings 
+} from "@/store/settingsSlice";
 const Settings = () => {
-  const [settings, setSettings] = useState({
-    facilityName: "Healthcare Facility",
-    lowStockThreshold: 5,
-    expirationWarningDays: 30,
-    autoBackup: true,
-    emailNotifications: true,
-    smsNotifications: false,
-    reportingFrequency: "monthly"
-  });
-
-  const [loading, setLoading] = useState(false);
-
-  const handleInputChange = (field, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const dispatch = useDispatch();
+  const { settings, loading } = useSelector((state) => state.settings);
+const handleInputChange = (field, value) => {
+    dispatch(updateSingleSetting({ field, value }));
   };
-
-  const handleSave = async () => {
-    setLoading(true);
+const handleSave = async () => {
+    dispatch(setLoading(true));
     
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Settings are already updated in Redux store via handleInputChange
+      dispatch(setLoading(false));
       toast.success("Settings saved successfully");
     } catch (error) {
+      dispatch(setLoading(false));
       toast.error("Failed to save settings. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleReset = () => {
-    setSettings({
-      facilityName: "Healthcare Facility",
-      lowStockThreshold: 5,
-      expirationWarningDays: 30,
-      autoBackup: true,
-      emailNotifications: true,
-      smsNotifications: false,
-      reportingFrequency: "monthly"
-    });
+const handleReset = () => {
+    dispatch(resetSettings());
     toast.info("Settings reset to default values");
   };
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Page Header */}
