@@ -46,10 +46,10 @@ const Sidebar = ({ isOpen, onClose, className }) => {
           ))}
         </nav>
         
-        <div className="px-4 py-4 border-t border-gray-200">
+<div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center text-sm text-gray-600">
             <ApperIcon name="Shield" className="h-4 w-4 mr-2" />
-            <span>Healthcare Facility</span>
+            <span>Pediatrics of Southwest Houston</span>
           </div>
         </div>
       </aside>
@@ -83,10 +83,10 @@ const Sidebar = ({ isOpen, onClose, className }) => {
           ))}
         </nav>
         
-        <div className="px-4 py-4 border-t border-gray-200">
+<div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center text-sm text-gray-600">
             <ApperIcon name="Shield" className="h-4 w-4 mr-2" />
-            <span>Healthcare Facility</span>
+            <span>Pediatrics of Southwest Houston</span>
           </div>
         </div>
       </div>
