@@ -33,7 +33,7 @@ const Header = ({ onMenuClick, className }) => {
               <ApperIcon name="Shield" className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston PA</h1>
+              <h1 className="text-lg font-semibold text-gray-900">Pediatrics of Southwest Houston</h1>
               <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
           </div>
