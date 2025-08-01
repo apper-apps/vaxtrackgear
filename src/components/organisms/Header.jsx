@@ -27,7 +27,6 @@ const Header = ({ onMenuClick, className }) => {
           >
             <ApperIcon name="Menu" className="h-5 w-5" />
           </Button>
-          
 <div className="flex items-center space-x-3">
             <div>
               <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston, PA</h1>
