@@ -28,14 +28,21 @@ const Sidebar = ({ isOpen, onClose, className }) => {
         "hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-gray-200 min-h-screen",
         className
       )}>
-        <div className="flex items-center px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-              <ApperIcon name="Shield" className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
-              <p className="text-xs text-gray-500">Vaccine Management</p>
+<div className="flex items-center px-6 py-4 border-b border-gray-200">
+          <div className="flex flex-col items-center w-full">
+            <img 
+              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751755556228-512512squarePediatricsHouston.png" 
+              alt="Pediatrics Houston Logo" 
+              className="h-12 w-12 rounded-lg object-cover mb-2"
+            />
+            <div className="flex items-center">
+              <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
+                <ApperIcon name="Shield" className="h-6 w-6 text-white" />
+              </div>
+              <div className="ml-3">
+                <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
+                <p className="text-xs text-gray-500">Vaccine Management</p>
+              </div>
             </div>
           </div>
         </div>
@@ -59,14 +66,21 @@ const Sidebar = ({ isOpen, onClose, className }) => {
         "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:hidden",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-              <ApperIcon name="Shield" className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
-              <p className="text-xs text-gray-500">Vaccine Management</p>
+<div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex flex-col items-center w-full">
+            <img 
+              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751755556228-512512squarePediatricsHouston.png" 
+              alt="Pediatrics Houston Logo" 
+              className="h-12 w-12 rounded-lg object-cover mb-2"
+            />
+            <div className="flex items-center">
+              <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
+                <ApperIcon name="Shield" className="h-6 w-6 text-white" />
+              </div>
+              <div className="ml-3">
+                <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
+                <p className="text-xs text-gray-500">Vaccine Management</p>
+              </div>
             </div>
           </div>
           <button
