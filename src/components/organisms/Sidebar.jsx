@@ -4,12 +4,11 @@ import NavItem from "@/components/molecules/NavItem";
 import ApperIcon from "@/components/ApperIcon";
 
 const Sidebar = ({ isOpen, onClose, className }) => {
-const navItems = [
+  const navItems = [
     { to: "/", icon: "BarChart3", label: "Dashboard" },
-    { to: "/vaccines", icon: "Syringe", label: "Vaccines" },
     { to: "/inventory", icon: "Package", label: "Inventory" },
     { to: "/receive", icon: "TruckIcon", label: "Receive Vaccines" },
-    { to: "/administer", icon: "Activity", label: "Record Administration" },
+    { to: "/administer", icon: "Syringe", label: "Record Administration" },
     { to: "/reports", icon: "FileText", label: "Reports" },
     { to: "/settings", icon: "Settings", label: "Settings" }
   ];
