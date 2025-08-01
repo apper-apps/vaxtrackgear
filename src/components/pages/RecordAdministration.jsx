@@ -48,7 +48,7 @@ const RecordAdministration = () => {
     setFilteredVaccines(filtered);
   };
 
-  const handleUpdateVaccine = async (updatedVaccine) => {
+const handleUpdateVaccine = async (updatedVaccine) => {
     try {
       await VaccineService.update(updatedVaccine.Id, updatedVaccine);
       
@@ -59,14 +59,14 @@ const RecordAdministration = () => {
       
       setVaccines(updatedVaccines);
       
-      // Update filtered vaccines
+      // Update filtered vaccines with showAdministration flag
       const updatedFiltered = (searchTerm ? 
         updatedVaccines.filter(vaccine => 
           vaccine.commercialName?.toLowerCase().includes(searchTerm) ||
           vaccine.genericName?.toLowerCase().includes(searchTerm) ||
           vaccine.lotNumber?.toLowerCase().includes(searchTerm)
         ) : updatedVaccines
-      );
+      ).map(vaccine => ({ ...vaccine, showAdministration: true }));
       
       setFilteredVaccines(updatedFiltered);
     } catch (err) {
@@ -134,8 +134,8 @@ const RecordAdministration = () => {
           }}
         />
       ) : (
-        <VaccineTable 
-          vaccines={filteredVaccines} 
+<VaccineTable 
+          vaccines={filteredVaccines.map(vaccine => ({ ...vaccine, showAdministration: true }))} 
           onUpdateVaccine={handleUpdateVaccine}
           showAdministration={true}
         />

@@ -18,13 +18,15 @@ const VaccineTable = ({
 const [sortBy, setSortBy] = useState("commercialName");
   const [sortOrder, setSortOrder] = useState("asc");
 const [quantityEdits, setQuantityEdits] = useState({});
-  const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null });
+  const [administeredEdits, setAdministeredEdits] = useState({});
+  const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null, editType: 'quantity' });
 
-  const handleQuantityEdit = (vaccineId, currentQuantity) => {
+const handleQuantityEdit = (vaccineId, currentQuantity) => {
     setPasswordPrompt({
       show: true,
       vaccineId: vaccineId,
-      currentQuantity: currentQuantity
+      currentQuantity: currentQuantity,
+      editType: 'quantity'
     });
   };
 
@@ -65,15 +67,63 @@ const [quantityEdits, setQuantityEdits] = useState({});
       delete updated[vaccineId];
       return updated;
     });
-};
+  };
 
-  const handlePasswordSubmit = (password) => {
+  const handleAdministeredEdit = (vaccineId, currentAdministered) => {
+    setAdministeredEdits(prev => ({
+      ...prev,
+      [vaccineId]: currentAdministered || 0
+    }));
+  };
+
+  const handleAdministeredChange = (vaccineId, value) => {
+    const numValue = parseInt(value) || 0;
+    setAdministeredEdits(prev => ({
+      ...prev,
+      [vaccineId]: numValue
+    }));
+  };
+
+  const handleSaveAdministered = (vaccine) => {
+    const newAdministered = administeredEdits[vaccine.Id];
+    
+    if (newAdministered < 0) {
+      toast.error("Administered doses cannot be negative");
+      return;
+    }
+
+    const updatedVaccine = {
+      ...vaccine,
+      administeredDoses: newAdministered
+    };
+
+    onUpdateVaccine(updatedVaccine);
+    setAdministeredEdits(prev => {
+      const updated = { ...prev };
+      delete updated[vaccine.Id];
+      return updated;
+    });
+    
+    toast.success(`Updated administered doses for ${vaccine.commercialName}`);
+  };
+
+  const handleCancelAdministered = (vaccineId) => {
+    setAdministeredEdits(prev => {
+      const updated = { ...prev };
+      delete updated[vaccineId];
+      return updated;
+    });
+  };
+
+const handlePasswordSubmit = (password) => {
     if (password === "Office6700$#") {
-      setQuantityEdits(prev => ({
-        ...prev,
-        [passwordPrompt.vaccineId]: passwordPrompt.currentQuantity
-      }));
-      setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+      if (passwordPrompt.editType === 'quantity') {
+        setQuantityEdits(prev => ({
+          ...prev,
+          [passwordPrompt.vaccineId]: passwordPrompt.currentQuantity
+        }));
+      }
+      setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null, editType: 'quantity' });
       toast.success("Password verified. You can now edit the quantity.");
     } else {
       toast.error("Invalid password. Access denied.");
@@ -81,7 +131,7 @@ const [quantityEdits, setQuantityEdits] = useState({});
   };
 
   const handlePasswordCancel = () => {
-    setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+    setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null, editType: 'quantity' });
   };
 const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
@@ -89,6 +139,7 @@ const columns = [
     { key: "lotNumber", label: "Lot Number", sortable: true },
     { key: "expirationDate", label: "Expiration Date", sortable: true },
     { key: "quantityOnHand", label: "Quantity On Hand", sortable: true },
+    ...(vaccines.some(v => v.showAdministration) ? [{ key: "administeredDoses", label: "Administered Doses", sortable: true }] : []),
     { key: "status", label: "Status", sortable: false }
   ];
 
@@ -211,6 +262,52 @@ const columns = [
                     </div>
                   )}
                 </td>
+                {vaccines.some(v => v.showAdministration) && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {administeredEdits.hasOwnProperty(vaccine.Id) ? (
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={administeredEdits[vaccine.Id]}
+                          onChange={(e) => handleAdministeredChange(vaccine.Id, e.target.value)}
+                          className="w-20 text-center"
+                          size="sm"
+                        />
+                        <Button
+                          variant="accent"
+                          size="sm"
+                          onClick={() => handleSaveAdministered(vaccine)}
+                          title="Save administered doses"
+                        >
+                          <ApperIcon name="Syringe" className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelAdministered(vaccine.Id)}
+                        >
+                          <ApperIcon name="X" className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-blue-600">
+                          {vaccine.administeredDoses || 0}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAdministeredEdit(vaccine.Id, vaccine.administeredDoses)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Record administered doses"
+                        >
+                          <ApperIcon name="Syringe" className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                )}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(vaccine)}
                 </td>
@@ -228,7 +325,7 @@ const columns = [
         </div>
       )}
 
-      {/* Password Prompt Dialog */}
+{/* Password Prompt Dialog */}
       {passwordPrompt.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
@@ -268,7 +365,7 @@ const columns = [
             </div>
           </div>
         </div>
-)}
+      )}
     </Card>
   );
 };
