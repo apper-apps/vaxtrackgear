@@ -33,14 +33,8 @@ const Sidebar = ({ isOpen, onClose, className }) => {
             <img 
               src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
               alt="Pediatrics Houston Logo" 
-              className="h-12 rounded-lg object-contain mb-2"
+              className="h-12 rounded-lg object-contain"
             />
-<div className="flex items-center">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
-                <p className="text-xs text-gray-500">Vaccine Management</p>
-              </div>
-            </div>
           </div>
         </div>
         
@@ -65,17 +59,11 @@ const Sidebar = ({ isOpen, onClose, className }) => {
       )}>
 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col items-center w-full">
-<img 
+            <img 
               src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
               alt="Pediatrics Houston Logo" 
-              className="h-12 rounded-lg object-contain mb-2"
+              className="h-12 rounded-lg object-contain"
             />
-            <div className="flex items-center">
-<div>
-                <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
-                <p className="text-xs text-gray-500">Vaccine Management</p>
-              </div>
-            </div>
           </div>
           <button
             onClick={onClose}
