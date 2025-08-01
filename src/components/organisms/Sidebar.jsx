@@ -31,7 +31,7 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="flex items-center px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col items-center w-full">
             <img 
-              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751755556228-512512squarePediatricsHouston.png" 
+              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
               alt="Pediatrics Houston Logo" 
               className="h-12 w-12 rounded-lg object-cover mb-2"
             />
@@ -66,7 +66,7 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col items-center w-full">
             <img 
-              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751755556228-512512squarePediatricsHouston.png" 
+              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
               alt="Pediatrics Houston Logo" 
               className="h-12 w-12 rounded-lg object-cover mb-2"
             />
