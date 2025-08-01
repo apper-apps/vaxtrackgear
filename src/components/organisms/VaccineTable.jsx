@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { cn } from "@/utils/cn";
-import Card from "@/components/atoms/Card";
+import ApperIcon from "@/components/ApperIcon";
+import TableHeader from "@/components/molecules/TableHeader";
 import Badge from "@/components/atoms/Badge";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
-import TableHeader from "@/components/molecules/TableHeader";
-import ApperIcon from "@/components/ApperIcon";
-import { formatDate, getExpirationStatus, getDaysUntilExpiration } from "@/utils/dateUtils";
+import Card from "@/components/atoms/Card";
+import { cn } from "@/utils/cn";
+import { formatDate, getDaysUntilExpiration, getExpirationStatus } from "@/utils/dateUtils";
 import { getStockStatus } from "@/utils/vaccineUtils";
 
 const VaccineTable = ({ 
@@ -19,13 +19,15 @@ const VaccineTable = ({
 const [sortBy, setSortBy] = useState("commercialName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [adminDoses, setAdminDoses] = useState({});
-  const [quantityEdits, setQuantityEdits] = useState({});
+const [quantityEdits, setQuantityEdits] = useState({});
+  const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null });
 
   const handleQuantityEdit = (vaccineId, currentQuantity) => {
-    setQuantityEdits(prev => ({
-      ...prev,
-      [vaccineId]: currentQuantity
-    }));
+    setPasswordPrompt({
+      show: true,
+      vaccineId: vaccineId,
+      currentQuantity: currentQuantity
+    });
   };
 
   const handleQuantityChange = (vaccineId, value) => {
@@ -65,6 +67,23 @@ const [sortBy, setSortBy] = useState("commercialName");
       delete updated[vaccineId];
       return updated;
     });
+};
+
+  const handlePasswordSubmit = (password) => {
+    if (password === "Office6700$#") {
+      setQuantityEdits(prev => ({
+        ...prev,
+        [passwordPrompt.vaccineId]: passwordPrompt.currentQuantity
+      }));
+      setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+      toast.success("Password verified. You can now edit the quantity.");
+    } else {
+      toast.error("Invalid password. Access denied.");
+    }
+  };
+
+  const handlePasswordCancel = () => {
+    setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
   };
   const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
@@ -267,15 +286,56 @@ const [sortBy, setSortBy] = useState("commercialName");
         </table>
       </div>
       
-      {sortedVaccines.length === 0 && (
+{sortedVaccines.length === 0 && (
         <div className="text-center py-12">
           <ApperIcon name="Package" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No vaccines found</h3>
           <p className="text-gray-500">No vaccine inventory data is available.</p>
         </div>
       )}
+
+      {/* Password Prompt Dialog */}
+      {passwordPrompt.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Password Required
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Please enter the password to edit quantity on hand:
+            </p>
+            <Input
+              type="password"
+              placeholder="Enter password"
+              className="w-full mb-4"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handlePasswordSubmit(e.target.value);
+                }
+              }}
+              autoFocus
+            />
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={handlePasswordCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="accent"
+                onClick={(e) => {
+                  const input = e.target.closest('.bg-white').querySelector('input[type="password"]');
+                  handlePasswordSubmit(input.value);
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
-  );
 };
 
 export default VaccineTable;
