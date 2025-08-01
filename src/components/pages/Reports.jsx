@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
@@ -79,7 +80,7 @@ const Reports = () => {
     return { data: reportData, title: reportTitle };
   };
 
-  const exportToCSV = () => {
+const exportToCSV = () => {
     const { data, title } = generateReport();
     
     const headers = [
@@ -116,6 +117,92 @@ const Reports = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportToPDF = () => {
+    const { data, title } = generateReport();
+    
+    try {
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, 20, 25);
+      
+      // Add metadata
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Generated on: ${format(new Date(), "PPP")}`, 20, 35);
+      doc.text(`Total Records: ${data.length}`, 20, 42);
+      
+      // Prepare table data
+      const headers = [
+        "Commercial Name",
+        "Generic Name", 
+        "Lot Number",
+        "Expiration Date",
+        "Qty On Hand",
+        "Administered",
+        "Status"
+      ];
+      
+      const tableData = data.map(vaccine => [
+        vaccine.commercialName || '',
+        vaccine.genericName || '',
+        vaccine.lotNumber || '',
+        formatDate(vaccine.expirationDate),
+        vaccine.quantityOnHand?.toString() || '0',
+        (vaccine.administeredDoses || 0).toString(),
+        getExpirationStatus(vaccine.expirationDate)
+      ]);
+      
+      // Add table
+      let yPosition = 55;
+      const cellHeight = 8;
+      const colWidths = [35, 35, 25, 25, 20, 20, 25];
+      let xPosition = 15;
+      
+      // Draw headers
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      headers.forEach((header, index) => {
+        doc.rect(xPosition, yPosition, colWidths[index], cellHeight);
+        doc.text(header, xPosition + 2, yPosition + 5.5);
+        xPosition += colWidths[index];
+      });
+      
+      yPosition += cellHeight;
+      
+      // Draw data rows
+      doc.setFont(undefined, 'normal');
+      tableData.forEach((row, rowIndex) => {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        xPosition = 15;
+        row.forEach((cell, cellIndex) => {
+          doc.rect(xPosition, yPosition, colWidths[cellIndex], cellHeight);
+          const text = cell.toString();
+          const maxWidth = colWidths[cellIndex] - 4;
+          const lines = doc.splitTextToSize(text, maxWidth);
+          doc.text(lines[0] || '', xPosition + 2, yPosition + 5.5);
+          xPosition += colWidths[cellIndex];
+        });
+        
+        yPosition += cellHeight;
+      });
+      
+      // Save the PDF
+      const fileName = `${title.replace(/\s+/g, "_")}_${format(new Date(), "yyyy-MM-dd")}.pdf`;
+      doc.save(fileName);
+      
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   const getStatusBadge = (vaccine) => {
@@ -190,8 +277,7 @@ const Reports = () => {
             />
           </FormField>
         </div>
-        
-        <div className="mt-4 flex justify-end">
+<div className="mt-4 flex justify-end space-x-3">
           <Button 
             variant="primary" 
             onClick={exportToCSV}
@@ -199,6 +285,14 @@ const Reports = () => {
           >
             <ApperIcon name="Download" className="h-4 w-4 mr-2" />
             Export to CSV
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={exportToPDF}
+            className="inline-flex items-center"
+          >
+            <ApperIcon name="FileText" className="h-4 w-4 mr-2" />
+            Export to PDF
           </Button>
         </div>
       </Card>
