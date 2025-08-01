@@ -30,8 +30,8 @@ const Header = ({ onMenuClick, className }) => {
           
 <div className="flex items-center space-x-3">
             <div>
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 leading-tight">VaxTrack Pro</h1>
-              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">Vaccine Inventory Management</p>
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-semibold text-gray-900 leading-tight">VaxTrack Pro</h1>
+              <p className="text-sm sm:text-base text-gray-500 leading-relaxed">Vaccine Inventory Management</p>
             </div>
           </div>
         </div>
