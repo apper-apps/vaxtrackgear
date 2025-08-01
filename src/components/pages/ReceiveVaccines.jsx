@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Card from "@/components/atoms/Card";
@@ -11,7 +11,7 @@ import { VaccineService } from "@/services/api/VaccineService";
 
 const ReceiveVaccines = () => {
   const navigate = useNavigate();
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     commercialName: "",
     genericName: "",
@@ -26,30 +26,9 @@ const [loading, setLoading] = useState(false);
   });
 
   const [errors, setErrors] = useState({});
-  const [vaccines, setVaccines] = useState([]);
-  const [vaccineLoading, setVaccineLoading] = useState(false);
-  const [vaccineSuggestions, setVaccineSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedVaccine, setSelectedVaccine] = useState(null);
-
-  // Load existing vaccines for suggestions
-  useEffect(() => {
-    const loadVaccines = async () => {
-      setVaccineLoading(true);
-      try {
-        const data = await VaccineService.getAll();
-        setVaccines(data || []);
-      } catch (error) {
-        console.error("Error loading vaccines:", error);
-      } finally {
-        setVaccineLoading(false);
-      }
-    };
-    loadVaccines();
-  }, []);
 
   const validateForm = () => {
-const newErrors = {};
+    const newErrors = {};
     
     if (!formData.commercialName.trim()) {
       newErrors.commercialName = "Commercial name is required";
@@ -58,6 +37,7 @@ const newErrors = {};
     if (!formData.genericName.trim()) {
       newErrors.genericName = "Generic name is required";
     }
+    
     if (!formData.lotNumber.trim()) {
       newErrors.lotNumber = "Lot number is required";
     }
@@ -100,48 +80,6 @@ const newErrors = {};
         [field]: ""
       }));
     }
-};
-
-  // Handle vaccine selection from suggestions
-  const handleVaccineSelect = (vaccine) => {
-    setFormData(prev => ({
-      ...prev,
-      commercialName: vaccine.commercialName || "",
-      genericName: vaccine.genericName || ""
-    }));
-    setSelectedVaccine(vaccine);
-    setShowSuggestions(false);
-    setVaccineSuggestions([]);
-  };
-
-  // Handle vaccine name input and show suggestions
-  const handleVaccineNameChange = (field, value) => {
-    handleInputChange(field, value);
-    
-    if (value.trim().length >= 2) {
-      const suggestions = vaccines.filter(vaccine => {
-        const commercial = vaccine.commercialName?.toLowerCase() || "";
-        const generic = vaccine.genericName?.toLowerCase() || "";
-        const searchValue = value.toLowerCase();
-        return commercial.includes(searchValue) || generic.includes(searchValue);
-      });
-      
-      setVaccineSuggestions(suggestions);
-      setShowSuggestions(true);
-    } else {
-      setVaccineSuggestions([]);
-      setShowSuggestions(false);
-    }
-    
-    setSelectedVaccine(null);
-  };
-
-  // Handle adding new vaccine option
-  const handleAddNewVaccine = () => {
-    setShowSuggestions(false);
-    setVaccineSuggestions([]);
-    setSelectedVaccine(null);
-    // Keep current form values for manual entry
   };
 
   const handleSubmit = async (e) => {
@@ -183,9 +121,6 @@ const newErrors = {};
         dosesFailed: "",
         discrepancyReason: ""
       });
-      setSelectedVaccine(null);
-      setVaccineSuggestions([]);
-      setShowSuggestions(false);
       
       navigate("/inventory");
     } catch (error) {
@@ -194,63 +129,6 @@ const newErrors = {};
       setLoading(false);
     }
   };
-
-  // Vaccine Selector Component
-  const VaccineSelector = ({ label, field, value, required, error, placeholder }) => (
-    <div className="relative">
-      <FormField
-        label={label}
-        required={required}
-        value={value}
-        onChange={(e) => handleVaccineNameChange(field, e.target.value)}
-        error={error}
-        placeholder={placeholder}
-        onFocus={() => {
-          if (value.trim().length >= 2) {
-            setShowSuggestions(true);
-          }
-        }}
-      />
-      
-      {showSuggestions && vaccineSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {vaccineSuggestions.map((vaccine, index) => (
-            <div
-              key={vaccine.Id || index}
-              className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-              onClick={() => handleVaccineSelect(vaccine)}
-            >
-              <div className="font-medium text-gray-900">
-                {vaccine.commercialName || "No commercial name"}
-              </div>
-              <div className="text-sm text-gray-600">
-                Generic: {vaccine.genericName || "No generic name"}
-              </div>
-            </div>
-          ))}
-          {vaccineSuggestions.length === 0 && value.trim().length >= 2 && (
-            <div className="px-4 py-3 text-gray-500">
-              <div className="mb-2">No matching vaccines found</div>
-              <button
-                type="button"
-                onClick={handleAddNewVaccine}
-                className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center"
-              >
-                <ApperIcon name="Plus" className="h-4 w-4 mr-1" />
-                Add new vaccine
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {vaccineLoading && (
-        <div className="absolute right-3 top-9 flex items-center">
-          <ApperIcon name="Loader2" className="h-4 w-4 animate-spin text-gray-400" />
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -269,23 +147,23 @@ const newErrors = {};
               Vaccine Information
             </h2>
             
-<div className="space-y-4">
-              <VaccineSelector
+            <div className="space-y-4">
+              <FormField
                 label="Commercial Name"
-                field="commercialName"
                 required
                 value={formData.commercialName}
+                onChange={(e) => handleInputChange("commercialName", e.target.value)}
                 error={errors.commercialName}
-                placeholder="Start typing to search existing vaccines..."
+                placeholder="e.g., Daptacel SDV"
               />
               
-              <VaccineSelector
+              <FormField
                 label="Generic Name"
-                field="genericName"
                 required
                 value={formData.genericName}
+                onChange={(e) => handleInputChange("genericName", e.target.value)}
                 error={errors.genericName}
-                placeholder="Start typing to search existing vaccines..."
+                placeholder="e.g., DTaP"
               />
               
               <FormField
