@@ -35,11 +35,8 @@ const Sidebar = ({ isOpen, onClose, className }) => {
               alt="Pediatrics Houston Logo" 
               className="h-12 w-12 rounded-lg object-cover mb-2"
             />
-            <div className="flex items-center">
-              <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-                <ApperIcon name="Shield" className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-3">
+<div className="flex items-center">
+              <div>
                 <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
                 <p className="text-xs text-gray-500">Vaccine Management</p>
               </div>
@@ -74,10 +71,7 @@ const Sidebar = ({ isOpen, onClose, className }) => {
               className="h-12 w-12 rounded-lg object-cover mb-2"
             />
             <div className="flex items-center">
-              <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2 rounded-lg">
-                <ApperIcon name="Shield" className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-3">
+<div>
                 <h1 className="text-xl font-bold text-gray-900">VaxTrack Pro</h1>
                 <p className="text-xs text-gray-500">Vaccine Management</p>
               </div>
