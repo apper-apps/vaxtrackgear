@@ -258,5 +258,91 @@ export const VaccineService = {
       }
       return false;
     }
+},
+
+  async searchByName(searchTerm) {
+    try {
+      if (!searchTerm || !searchTerm.trim()) {
+        return [];
+      }
+
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "commercialName" } },
+          { field: { Name: "genericName" } },
+          { field: { Name: "quantityOnHand" } }
+        ],
+        where: [
+          {
+            FieldName: "commercialName",
+            Operator: "Contains",
+            Values: [searchTerm],
+            Include: true
+          }
+        ],
+        whereGroups: [
+          {
+            operator: "OR",
+            subGroups: [
+              {
+                conditions: [
+                  {
+                    fieldName: "commercialName",
+                    operator: "Contains",
+                    subOperator: "",
+                    values: [searchTerm]
+                  }
+                ],
+                operator: "OR"
+              },
+              {
+                conditions: [
+                  {
+                    fieldName: "genericName",
+                    operator: "Contains",
+                    subOperator: "",
+                    values: [searchTerm]
+                  }
+                ],
+                operator: "OR"
+              }
+            ]
+          }
+        ],
+        orderBy: [
+          {
+            fieldName: "commercialName",
+            sorttype: "ASC"
+          }
+        ],
+        pagingInfo: {
+          limit: 20,
+          offset: 0
+        }
+      };
+
+      const response = await apperClient.fetchRecords("vaccine", params);
+
+      if (!response.success) {
+        console.error("Error searching vaccines:", response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error searching vaccines:", error?.response?.data?.message);
+      } else {
+        console.error("Error searching vaccines:", error.message);
+      }
+      return [];
+    }
   }
 };

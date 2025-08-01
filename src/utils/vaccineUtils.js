@@ -101,3 +101,34 @@ export const findVaccineByNames = (vaccines, commercialName, genericName) => {
     vaccine.genericName?.toLowerCase() === genericName?.toLowerCase()
   );
 };
+
+export const hasExactMatch = (vaccines, searchTerm) => {
+  const term = searchTerm.toLowerCase();
+  return vaccines.some(vaccine => 
+    vaccine.commercialName?.toLowerCase() === term ||
+    vaccine.genericName?.toLowerCase() === term ||
+    `${vaccine.commercialName} (${vaccine.genericName})`.toLowerCase() === term
+  );
+};
+
+export const getSearchSuggestions = (vaccines, searchTerm, limit = 10) => {
+  if (!searchTerm.trim()) return [];
+  
+  const term = searchTerm.toLowerCase();
+  const exactMatches = [];
+  const partialMatches = [];
+  
+  vaccines.forEach(vaccine => {
+    const commercialName = vaccine.commercialName?.toLowerCase() || '';
+    const genericName = vaccine.genericName?.toLowerCase() || '';
+    const fullName = `${vaccine.commercialName} (${vaccine.genericName})`.toLowerCase();
+    
+    if (commercialName === term || genericName === term || fullName === term) {
+      exactMatches.push(vaccine);
+    } else if (commercialName.includes(term) || genericName.includes(term)) {
+      partialMatches.push(vaccine);
+    }
+  });
+  
+  return [...exactMatches, ...partialMatches].slice(0, limit);
+};

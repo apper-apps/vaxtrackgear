@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import FormField from "@/components/molecules/FormField";
-import Select from "@/components/atoms/Select";
-import Textarea from "@/components/atoms/Textarea";
-import ApperIcon from "@/components/ApperIcon";
 import { VaccineService } from "@/services/api/VaccineService";
+import ApperIcon from "@/components/ApperIcon";
+import FormField from "@/components/molecules/FormField";
+import Textarea from "@/components/atoms/Textarea";
+import Button from "@/components/atoms/Button";
+import Select from "@/components/atoms/Select";
+import Card from "@/components/atoms/Card";
 
 const ReceiveVaccines = () => {
   const navigate = useNavigate();
@@ -15,10 +15,10 @@ const [loading, setLoading] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [filteredVaccines, setFilteredVaccines] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedVaccine, setSelectedVaccine] = useState(null);
+const [selectedVaccine, setSelectedVaccine] = useState(null);
   const [isCreateNewMode, setIsCreateNewMode] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  
   const [formData, setFormData] = useState({
     commercialName: "",
     genericName: "",
@@ -108,6 +108,28 @@ const [errors, setErrors] = useState({});
     }));
     
     // Clear errors when switching modes
+    setErrors(prev => ({
+      ...prev,
+      commercialName: "",
+      genericName: ""
+    }));
+};
+
+  const handleCreateNew = () => {
+    setIsCreatingNew(true);
+    setSelectedVaccine(null);
+    setShowDropdown(false);
+    
+    // If there's a search term, use it as the commercial name
+    if (searchTerm.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        commercialName: searchTerm.trim(),
+        genericName: ""
+      }));
+    }
+    
+    // Clear errors
     setErrors(prev => ({
       ...prev,
       commercialName: "",
@@ -236,58 +258,31 @@ const [errors, setErrors] = useState({});
             </h2>
             
             <div className="space-y-4">
-              {/* Mode Selection */}
-              <div className="flex space-x-4 mb-6">
-                <button
-                  type="button"
-                  onClick={() => handleModeChange(false)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    !isCreateNewMode 
-                      ? 'bg-primary-100 text-primary-700 border border-primary-300' 
-                      : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
-                  }`}
-                >
-                  Select Existing Vaccine
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleModeChange(true)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isCreateNewMode 
-                      ? 'bg-primary-100 text-primary-700 border border-primary-300' 
-                      : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
-                  }`}
-                >
-                  Create New Vaccine
-                </button>
-              </div>
-
-              {/* Vaccine Selection/Creation */}
-              {!isCreateNewMode ? (
-                <div className="space-y-4">
-                  {/* Search Field */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Search Vaccines <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      onFocus={() => setShowDropdown(searchTerm.trim().length > 0)}
-                      placeholder="Search by commercial or generic name..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
-                    />
-                    
-                    {/* Dropdown */}
-                    {showDropdown && filteredVaccines.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+              {/* Unified Search Field */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Search Vaccines <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => setShowDropdown(searchTerm.trim().length > 0)}
+                  placeholder="Type vaccine name (commercial or generic)..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                />
+                
+                {/* Enhanced Dropdown */}
+                {showDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredVaccines.length > 0 ? (
+                      <>
                         {filteredVaccines.map((vaccine) => (
                           <button
                             key={vaccine.Id}
                             type="button"
                             onClick={() => handleVaccineSelect(vaccine)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100"
                           >
                             <div className="flex justify-between items-center">
                               <div>
@@ -300,31 +295,66 @@ const [errors, setErrors] = useState({});
                             </div>
                           </button>
                         ))}
-                      </div>
-                    )}
-                    
-                    {showDropdown && filteredVaccines.length === 0 && searchTerm.trim() && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3 text-center text-gray-500">
-                        No vaccines found. Try "Create New Vaccine" mode.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Selected Vaccine Display */}
-                  {selectedVaccine && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center">
-                        <ApperIcon name="CheckCircle" className="h-5 w-5 text-green-600 mr-2" />
-                        <div>
-                          <div className="font-medium text-green-800">Selected: {selectedVaccine.commercialName}</div>
-                          <div className="text-sm text-green-600">Generic: {selectedVaccine.genericName}</div>
+                        <div className="border-t border-gray-200">
+                          <button
+                            type="button"
+                            onClick={handleCreateNew}
+                            className="w-full px-3 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none text-primary-600 font-medium"
+                          >
+                            <div className="flex items-center">
+                              <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
+                              Create new vaccine instead
+                            </div>
+                          </button>
                         </div>
-                      </div>
+                      </>
+                    ) : searchTerm.trim() ? (
+                      <button
+                        type="button"
+                        onClick={handleCreateNew}
+                        className="w-full px-3 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none text-primary-600 font-medium"
+                      >
+                        <div className="flex items-center justify-center">
+                          <ApperIcon name="Plus" className="h-5 w-5 mr-2" />
+                          <div>
+                            <div>Create new vaccine: "{searchTerm}"</div>
+                            <div className="text-xs text-gray-500 mt-1">No existing vaccines found</div>
+                          </div>
+                        </div>
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {/* Selection Status Display */}
+              {selectedVaccine && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <ApperIcon name="CheckCircle" className="h-5 w-5 text-green-600 mr-2" />
+                    <div>
+                      <div className="font-medium text-green-800">Selected: {selectedVaccine.commercialName}</div>
+                      <div className="text-sm text-green-600">Generic: {selectedVaccine.genericName}</div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-4">
+              )}
+
+              {isCreatingNew && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <ApperIcon name="Plus" className="h-5 w-5 text-blue-600 mr-2" />
+                    <div>
+                      <div className="font-medium text-blue-800">Creating new vaccine</div>
+                      <div className="text-sm text-blue-600">Please fill in the details below</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Dynamic Form Fields */}
+              {isCreatingNew && (
+                <div className="space-y-4 pt-2">
                   <FormField
                     label="Commercial Name"
                     required
