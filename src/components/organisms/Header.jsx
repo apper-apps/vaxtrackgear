@@ -17,8 +17,8 @@ const Header = ({ onMenuClick, className }) => {
 
   return (
     <header className={cn("bg-white border-b border-gray-200 px-4 lg:px-6 py-4", className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+<div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4 flex-1">
           <Button
             variant="ghost"
             size="sm"
@@ -27,15 +27,17 @@ const Header = ({ onMenuClick, className }) => {
           >
             <ApperIcon name="Menu" className="h-5 w-5" />
           </Button>
-<div className="flex items-center space-x-3">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston, PA</h1>
-              <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
-            </div>
+        </div>
+        
+        <div className="flex items-center justify-center flex-1">
+          <div className="text-center">
+            <h1 className="text-lg font-semibold text-gray-900">VaxTrack Pro</h1>
+            <p className="text-sm text-gray-500">Vaccine Management</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-end space-x-4 flex-1">
+
           {isAuthenticated && user && (
             <div className="flex items-center space-x-3">
               <div className="text-right">
