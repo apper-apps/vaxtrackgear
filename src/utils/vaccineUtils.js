@@ -65,5 +65,39 @@ export const sortVaccines = (vaccines, sortBy, sortOrder = "asc") => {
     } else {
       return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
     }
+});
+};
+
+export const searchVaccines = (vaccines, searchTerm) => {
+  if (!searchTerm.trim()) return [];
+  
+  const term = searchTerm.toLowerCase();
+  return vaccines.filter(vaccine => 
+    vaccine.commercialName?.toLowerCase().includes(term) ||
+    vaccine.genericName?.toLowerCase().includes(term)
+  );
+};
+
+export const getUniqueVaccinesByName = (vaccines) => {
+  const uniqueMap = new Map();
+  
+  vaccines.forEach(vaccine => {
+    const key = `${vaccine.commercialName}-${vaccine.genericName}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, vaccine);
+    }
   });
+  
+  return Array.from(uniqueMap.values());
+};
+
+export const formatVaccineDisplayName = (vaccine) => {
+  return `${vaccine.commercialName} (${vaccine.genericName})`;
+};
+
+export const findVaccineByNames = (vaccines, commercialName, genericName) => {
+  return vaccines.find(vaccine => 
+    vaccine.commercialName?.toLowerCase() === commercialName?.toLowerCase() &&
+    vaccine.genericName?.toLowerCase() === genericName?.toLowerCase()
+  );
 };

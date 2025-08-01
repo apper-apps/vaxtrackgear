@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Card from "@/components/atoms/Card";
@@ -11,7 +11,14 @@ import { VaccineService } from "@/services/api/VaccineService";
 
 const ReceiveVaccines = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+const [loading, setLoading] = useState(false);
+  const [vaccines, setVaccines] = useState([]);
+  const [filteredVaccines, setFilteredVaccines] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedVaccine, setSelectedVaccine] = useState(null);
+  const [isCreateNewMode, setIsCreateNewMode] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  
   const [formData, setFormData] = useState({
     commercialName: "",
     genericName: "",
@@ -24,8 +31,89 @@ const ReceiveVaccines = () => {
     dosesFailed: "",
     discrepancyReason: ""
   });
+const [errors, setErrors] = useState({});
 
-  const [errors, setErrors] = useState({});
+  // Load vaccines on component mount
+  useEffect(() => {
+    const loadVaccines = async () => {
+      try {
+        const vaccineData = await VaccineService.getAll();
+        setVaccines(vaccineData);
+      } catch (error) {
+        console.error("Error loading vaccines:", error);
+        toast.error("Failed to load vaccine data");
+      }
+    };
+    loadVaccines();
+  }, []);
+
+  // Filter vaccines based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredVaccines([]);
+      return;
+    }
+    
+    const filtered = vaccines.filter(vaccine => 
+      vaccine.commercialName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vaccine.genericName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredVaccines(filtered);
+  }, [searchTerm, vaccines]);
+
+  const handleVaccineSelect = (vaccine) => {
+    setSelectedVaccine(vaccine);
+    setSearchTerm(`${vaccine.commercialName} (${vaccine.genericName})`);
+    setFormData(prev => ({
+      ...prev,
+      commercialName: vaccine.commercialName,
+      genericName: vaccine.genericName
+    }));
+    setShowDropdown(false);
+    
+    // Clear any existing errors for these fields
+    if (errors.commercialName || errors.genericName) {
+      setErrors(prev => ({
+        ...prev,
+        commercialName: "",
+        genericName: ""
+      }));
+    }
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+    setSelectedVaccine(null);
+    setShowDropdown(value.trim().length > 0);
+    
+    // Clear form fields when search changes in select mode
+    if (!isCreateNewMode) {
+      setFormData(prev => ({
+        ...prev,
+        commercialName: "",
+        genericName: ""
+      }));
+    }
+  };
+
+  const handleModeChange = (createNew) => {
+    setIsCreateNewMode(createNew);
+    setSearchTerm("");
+    setSelectedVaccine(null);
+    setShowDropdown(false);
+    setFormData(prev => ({
+      ...prev,
+      commercialName: "",
+      genericName: ""
+    }));
+    
+    // Clear errors when switching modes
+    setErrors(prev => ({
+      ...prev,
+      commercialName: "",
+      genericName: ""
+    }));
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -141,30 +229,121 @@ const ReceiveVaccines = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Vaccine Information */}
-          <Card className="p-6">
+<Card className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <ApperIcon name="Package" className="h-5 w-5 mr-2" />
               Vaccine Information
             </h2>
             
             <div className="space-y-4">
-              <FormField
-                label="Commercial Name"
-                required
-                value={formData.commercialName}
-                onChange={(e) => handleInputChange("commercialName", e.target.value)}
-                error={errors.commercialName}
-                placeholder="e.g., Daptacel SDV"
-              />
-              
-              <FormField
-                label="Generic Name"
-                required
-                value={formData.genericName}
-                onChange={(e) => handleInputChange("genericName", e.target.value)}
-                error={errors.genericName}
-                placeholder="e.g., DTaP"
-              />
+              {/* Mode Selection */}
+              <div className="flex space-x-4 mb-6">
+                <button
+                  type="button"
+                  onClick={() => handleModeChange(false)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    !isCreateNewMode 
+                      ? 'bg-primary-100 text-primary-700 border border-primary-300' 
+                      : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  Select Existing Vaccine
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeChange(true)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    isCreateNewMode 
+                      ? 'bg-primary-100 text-primary-700 border border-primary-300' 
+                      : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  Create New Vaccine
+                </button>
+              </div>
+
+              {/* Vaccine Selection/Creation */}
+              {!isCreateNewMode ? (
+                <div className="space-y-4">
+                  {/* Search Field */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Search Vaccines <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      onFocus={() => setShowDropdown(searchTerm.trim().length > 0)}
+                      placeholder="Search by commercial or generic name..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                    />
+                    
+                    {/* Dropdown */}
+                    {showDropdown && filteredVaccines.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {filteredVaccines.map((vaccine) => (
+                          <button
+                            key={vaccine.Id}
+                            type="button"
+                            onClick={() => handleVaccineSelect(vaccine)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <div className="font-medium text-gray-900">{vaccine.commercialName}</div>
+                                <div className="text-sm text-gray-500">{vaccine.genericName}</div>
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                Stock: {vaccine.quantityOnHand || 0}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {showDropdown && filteredVaccines.length === 0 && searchTerm.trim() && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3 text-center text-gray-500">
+                        No vaccines found. Try "Create New Vaccine" mode.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Vaccine Display */}
+                  {selectedVaccine && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center">
+                        <ApperIcon name="CheckCircle" className="h-5 w-5 text-green-600 mr-2" />
+                        <div>
+                          <div className="font-medium text-green-800">Selected: {selectedVaccine.commercialName}</div>
+                          <div className="text-sm text-green-600">Generic: {selectedVaccine.genericName}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <FormField
+                    label="Commercial Name"
+                    required
+                    value={formData.commercialName}
+                    onChange={(e) => handleInputChange("commercialName", e.target.value)}
+                    error={errors.commercialName}
+                    placeholder="e.g., Daptacel SDV"
+                  />
+                  
+                  <FormField
+                    label="Generic Name"
+                    required
+                    value={formData.genericName}
+                    onChange={(e) => handleInputChange("genericName", e.target.value)}
+                    error={errors.genericName}
+                    placeholder="e.g., DTaP"
+                  />
+                </div>
+              )}
               
               <FormField
                 label="Lot Number"
