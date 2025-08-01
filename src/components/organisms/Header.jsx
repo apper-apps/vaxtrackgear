@@ -28,13 +28,13 @@ const Header = ({ onMenuClick, className }) => {
             <ApperIcon name="Menu" className="h-5 w-5" />
           </Button>
           
-          <div className="flex items-center space-x-3">
+<div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center">
               <ApperIcon name="Shield" className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">VaxTrack Pro</h1>
-              <p className="text-sm text-gray-500">Vaccine Inventory Management</p>
+              <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston PA</h1>
+              <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
           </div>
         </div>
