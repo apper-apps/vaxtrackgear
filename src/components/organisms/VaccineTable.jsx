@@ -16,10 +16,56 @@ const VaccineTable = ({
   showAdministration = false,
   className 
 }) => {
-  const [sortBy, setSortBy] = useState("commercialName");
+const [sortBy, setSortBy] = useState("commercialName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [adminDoses, setAdminDoses] = useState({});
+  const [quantityEdits, setQuantityEdits] = useState({});
 
+  const handleQuantityEdit = (vaccineId, currentQuantity) => {
+    setQuantityEdits(prev => ({
+      ...prev,
+      [vaccineId]: currentQuantity
+    }));
+  };
+
+  const handleQuantityChange = (vaccineId, value) => {
+    const numValue = parseInt(value) || 0;
+    setQuantityEdits(prev => ({
+      ...prev,
+      [vaccineId]: numValue
+    }));
+  };
+
+  const handleSaveQuantity = (vaccine) => {
+    const newQuantity = quantityEdits[vaccine.Id];
+    
+    if (newQuantity < 0) {
+      toast.error("Quantity cannot be negative");
+      return;
+    }
+
+    const updatedVaccine = {
+      ...vaccine,
+      quantityOnHand: newQuantity
+    };
+
+    onUpdateVaccine(updatedVaccine);
+    setQuantityEdits(prev => {
+      const updated = { ...prev };
+      delete updated[vaccine.Id];
+      return updated;
+    });
+    
+    toast.success(`Updated quantity for ${vaccine.commercialName}`);
+  };
+
+  const handleCancelQuantity = (vaccineId) => {
+    setQuantityEdits(prev => {
+      const updated = { ...prev };
+      delete updated[vaccineId];
+      return updated;
+    });
+  };
   const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
     { key: "genericName", label: "Generic Name", sortable: true },
@@ -122,8 +168,8 @@ const VaccineTable = ({
             onSort={handleSort}
           />
           <tbody className="bg-white divide-y divide-gray-200">
-            {sortedVaccines.map((vaccine) => (
-              <tr key={vaccine.Id} className="hover:bg-gray-50 transition-colors duration-150">
+{sortedVaccines.map((vaccine) => (
+              <tr key={vaccine.Id} className="group hover:bg-gray-50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-medium text-gray-900">
                     {vaccine.commercialName}
@@ -138,14 +184,51 @@ const VaccineTable = ({
                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                   {formatDate(vaccine.expirationDate)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={cn(
-                    "font-medium",
-                    vaccine.quantityOnHand === 0 ? "text-red-600" :
-                    vaccine.quantityOnHand <= 5 ? "text-orange-600" : "text-green-600"
-                  )}>
-                    {vaccine.quantityOnHand}
-                  </span>
+<td className="px-6 py-4 whitespace-nowrap">
+                  {quantityEdits.hasOwnProperty(vaccine.Id) ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={quantityEdits[vaccine.Id]}
+                        onChange={(e) => handleQuantityChange(vaccine.Id, e.target.value)}
+                        className="w-20 text-center"
+                        size="sm"
+                      />
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        onClick={() => handleSaveQuantity(vaccine)}
+                      >
+                        <ApperIcon name="Check" className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancelQuantity(vaccine.Id)}
+                      >
+                        <ApperIcon name="X" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span className={cn(
+                        "font-medium",
+                        vaccine.quantityOnHand === 0 ? "text-red-600" :
+                        vaccine.quantityOnHand <= 5 ? "text-orange-600" : "text-green-600"
+                      )}>
+                        {vaccine.quantityOnHand}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleQuantityEdit(vaccine.Id, vaccine.quantityOnHand)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ApperIcon name="Edit2" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(vaccine)}
