@@ -21,7 +21,7 @@ const [sortBy, setSortBy] = useState("commercialName");
   const [adminDoses, setAdminDoses] = useState({});
 const [quantityEdits, setQuantityEdits] = useState({});
   const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null });
-
+  const [passwordInput, setPasswordInput] = useState('');
   const handleQuantityEdit = (vaccineId, currentQuantity) => {
     setPasswordPrompt({
       show: true,
@@ -69,21 +69,24 @@ const [quantityEdits, setQuantityEdits] = useState({});
     });
 };
 
-  const handlePasswordSubmit = (password) => {
-    if (password === "Office6700$#") {
+const handlePasswordSubmit = () => {
+    if (passwordInput === "Office6700$#") {
       setQuantityEdits(prev => ({
         ...prev,
         [passwordPrompt.vaccineId]: passwordPrompt.currentQuantity
       }));
       setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+      setPasswordInput('');
       toast.success("Password verified. You can now edit the quantity.");
     } else {
       toast.error("Invalid password. Access denied.");
+      setPasswordInput('');
     }
   };
 
-  const handlePasswordCancel = () => {
+const handlePasswordCancel = () => {
     setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+    setPasswordInput('');
   };
   const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
@@ -304,13 +307,15 @@ const [quantityEdits, setQuantityEdits] = useState({});
             <p className="text-gray-600 mb-4">
               Please enter the password to edit quantity on hand:
             </p>
-            <Input
+<Input
               type="password"
               placeholder="Enter password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
               className="w-full mb-4"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handlePasswordSubmit(e.target.value);
+                  handlePasswordSubmit();
                 }
               }}
               autoFocus
@@ -324,10 +329,7 @@ const [quantityEdits, setQuantityEdits] = useState({});
               </Button>
               <Button
                 variant="accent"
-                onClick={(e) => {
-                  const input = e.target.closest('.bg-white').querySelector('input[type="password"]');
-                  handlePasswordSubmit(input.value);
-                }}
+onClick={handlePasswordSubmit}
               >
                 Submit
               </Button>
