@@ -88,11 +88,12 @@ const handlePasswordCancel = () => {
     setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
     setPasswordInput('');
   };
-  const columns = [
+const columns = [
     { key: "commercialName", label: "Vaccine Name", sortable: true },
     { key: "genericName", label: "Generic Name", sortable: true },
     { key: "lotNumber", label: "Lot Number", sortable: true },
     { key: "expirationDate", label: "Expiration Date", sortable: true },
+    { key: "receivedDate", label: "Received Date", sortable: true },
     { key: "quantityOnHand", label: "Quantity On Hand", sortable: true },
     { key: "status", label: "Status", sortable: false },
     ...(showAdministration ? [{ key: "administration", label: "Administer", sortable: false }] : [])
@@ -139,11 +140,11 @@ const handlePasswordCancel = () => {
     toast.success(`Successfully administered ${dosesToAdmin} doses of ${vaccine.commercialName}`);
   };
 
-  const sortedVaccines = [...vaccines].sort((a, b) => {
+const sortedVaccines = [...vaccines].sort((a, b) => {
     let aValue = a[sortBy];
     let bValue = b[sortBy];
     
-    if (sortBy === "expirationDate") {
+    if (sortBy === "expirationDate" || sortBy === "receivedDate") {
       aValue = aValue ? new Date(aValue) : new Date(0);
       bValue = bValue ? new Date(bValue) : new Date(0);
     } else if (typeof aValue === "string") {
@@ -203,10 +204,13 @@ const handlePasswordCancel = () => {
                 <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-600">
                   {vaccine.lotNumber}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+<td className="px-6 py-4 whitespace-nowrap text-gray-600">
                   {formatDate(vaccine.expirationDate)}
                 </td>
-<td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                  {formatDate(vaccine.receivedDate)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   {quantityEdits.hasOwnProperty(vaccine.Id) ? (
                     <div className="flex items-center space-x-2">
                       <Input
