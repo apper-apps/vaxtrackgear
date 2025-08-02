@@ -42,7 +42,7 @@ const Reports = () => {
     let reportData = [];
     let reportTitle = "";
     
-    switch (reportType) {
+switch (reportType) {
       case "current-inventory":
         reportData = vaccines;
         reportTitle = "Current Inventory Report";
@@ -68,6 +68,10 @@ const Reports = () => {
         });
         reportTitle = "Low Stock Report";
         break;
+      case "out-of-stock":
+        reportData = vaccines.filter(vaccine => vaccine.quantityOnHand === 0);
+        reportTitle = "Out of Stock Report";
+        break;
       case "administration-summary":
         reportData = vaccines.filter(vaccine => vaccine.administeredDoses > 0);
         reportTitle = "Administration Summary Report";
@@ -76,7 +80,6 @@ const Reports = () => {
         reportData = vaccines;
         reportTitle = "Vaccine Inventory Report";
     }
-    
     return { data: reportData, title: reportTitle };
   };
 
@@ -247,7 +250,7 @@ const exportToCSV = () => {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Report Configuration</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField label="Report Type">
+<FormField label="Report Type">
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
@@ -257,6 +260,7 @@ const exportToCSV = () => {
               <option value="expiring-soon">Expiring Soon (30 Days)</option>
               <option value="expired">Expired Vaccines</option>
               <option value="low-stock">Low Stock Alert</option>
+              <option value="out-of-stock">Out of Stock Report</option>
               <option value="administration-summary">Administration Summary</option>
             </select>
           </FormField>
