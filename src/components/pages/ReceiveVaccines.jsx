@@ -177,13 +177,10 @@ const [errors, setErrors] = useState({});
     return Object.keys(newErrors).length === 0;
   };
 
-const handleInputChange = (field, value) => {
-    // Convert lot number to uppercase automatically
-    const processedValue = field === 'lotNumber' ? value.toUpperCase() : value;
-    
+  const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
-      [field]: processedValue
+      [field]: value
     }));
     
     // Clear error when user starts typing
