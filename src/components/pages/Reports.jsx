@@ -145,17 +145,19 @@ const exportToCSV = () => {
         "Qty On Hand",
         "Administered",
         "Status"
-      ];
+];
       
-      const tableData = data.map(vaccine => [
-        vaccine.commercialName || '',
-        vaccine.genericName || '',
-        vaccine.lotNumber || '',
-        formatDate(vaccine.expirationDate),
-        vaccine.quantityOnHand?.toString() || '0',
-        (vaccine.administeredDoses || 0).toString(),
-        getExpirationStatus(vaccine.expirationDate)
-      ]);
+      const tableData = data
+        .filter(vaccine => vaccine.quantityOnHand > 0)
+        .map(vaccine => [
+          vaccine.commercialName || '',
+          vaccine.genericName || '',
+          vaccine.lotNumber || '',
+          formatDate(vaccine.expirationDate),
+          vaccine.quantityOnHand?.toString() || '0',
+          (vaccine.administeredDoses || 0).toString(),
+          getExpirationStatus(vaccine.expirationDate)
+        ]);
       
       // Add table
       let yPosition = 55;
