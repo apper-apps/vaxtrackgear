@@ -385,18 +385,18 @@ const [errors, setErrors] = useState({});
               />
               
               <FormField
-                label="Expiration Date"
+label="Expiration Date"
                 required
-                type="date"
+                type="text"
                 value={formData.expirationDate}
                 onChange={(e) => handleInputChange("expirationDate", e.target.value)}
                 error={errors.expirationDate}
               />
               
-              <FormField
+<FormField
                 label="Received Date"
                 required
-                type="date"
+                type="text"
                 value={formData.receivedDate}
                 onChange={(e) => handleInputChange("receivedDate", e.target.value)}
                 error={errors.receivedDate}
