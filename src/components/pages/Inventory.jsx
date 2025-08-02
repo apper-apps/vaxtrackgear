@@ -17,10 +17,13 @@ const Inventory = () => {
     setLoading(true);
     setError("");
     
-    try {
+try {
       const data = await VaccineService.getAll();
-      setVaccines(data);
-      setFilteredVaccines(data);
+      // Filter out vaccines with zero quantity on hand
+      const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand > 0);
+      const vaccinesWithStock = filterVaccinesWithStock(data);
+      setVaccines(vaccinesWithStock);
+      setFilteredVaccines(vaccinesWithStock);
     } catch (err) {
       setError("Failed to load vaccine inventory. Please try again.");
     } finally {
@@ -47,21 +50,25 @@ const Inventory = () => {
   };
 
   const handleUpdateVaccine = async (updatedVaccine) => {
-    try {
+try {
       await VaccineService.update(updatedVaccine.Id, updatedVaccine);
       
       const updatedVaccines = vaccines.map(vaccine => 
         vaccine.Id === updatedVaccine.Id ? updatedVaccine : vaccine
       );
       
-      setVaccines(updatedVaccines);
+      // Filter out vaccines with zero quantity on hand
+      const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand > 0);
+      const vaccinesWithStock = filterVaccinesWithStock(updatedVaccines);
+      
+      setVaccines(vaccinesWithStock);
       setFilteredVaccines(
         searchTerm ? 
-        updatedVaccines.filter(vaccine => 
+        vaccinesWithStock.filter(vaccine => 
           vaccine.commercialName?.toLowerCase().includes(searchTerm) ||
           vaccine.genericName?.toLowerCase().includes(searchTerm) ||
           vaccine.lotNumber?.toLowerCase().includes(searchTerm)
-        ) : updatedVaccines
+        ) : vaccinesWithStock
       );
     } catch (err) {
       setError("Failed to update vaccine. Please try again.");
