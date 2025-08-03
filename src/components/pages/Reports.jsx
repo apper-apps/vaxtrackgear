@@ -11,7 +11,7 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
 import { formatDate, getExpirationStatus } from "@/utils/dateUtils";
-import { getStockStatus } from "@/utils/vaccineUtils";
+import { aggregateVaccinesByName, getStockStatus } from "@/utils/vaccineUtils";
 
 const Reports = () => {
   const [vaccines, setVaccines] = useState([]);
@@ -20,7 +20,8 @@ const Reports = () => {
   const [reportType, setReportType] = useState("current-inventory");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-
+  const [reportData, setReportData] = useState([]);
+  const [reportTitle, setReportTitle] = useState("");
   const loadVaccines = async () => {
     setLoading(true);
     setError("");
@@ -35,10 +36,19 @@ const Reports = () => {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
     loadVaccines();
   }, []);
 
+  useEffect(() => {
+    const updateReport = async () => {
+      const { data, title } = await generateReport();
+      setReportData(data);
+      setReportTitle(title);
+    };
+    
+    updateReport();
+  }, [vaccines, reportType]);
 const generateReport = async () => {
     let reportData = [];
     let reportTitle = "";
@@ -271,18 +281,7 @@ const exportToPDF = async () => {
     return <Error message={error} onRetry={loadVaccines} />;
 }
 
-  const [reportData, setReportData] = useState([]);
-  const [reportTitle, setReportTitle] = useState("");
 
-  useEffect(() => {
-    const updateReport = async () => {
-      const { data, title } = await generateReport();
-      setReportData(data);
-      setReportTitle(title);
-    };
-    
-    updateReport();
-  }, [vaccines, reportType]);
 
   return (
     <div className="space-y-6">
