@@ -40,7 +40,11 @@ export const getLowStockVaccines = (vaccines, threshold = 5) => {
 };
 
 export const getOutOfStockVaccines = (vaccines) => {
-  return vaccines.filter(vaccine => vaccine.quantityOnHand === 0);
+  // First aggregate vaccines by name to combine quantities across lot numbers
+  const aggregatedVaccines = aggregateVaccinesByName(vaccines);
+  
+  // Then filter for vaccines with zero total quantity
+  return aggregatedVaccines.filter(vaccine => vaccine.quantityOnHand === 0);
 };
 
 export const sortVaccines = (vaccines, sortBy, sortOrder = "asc") => {
