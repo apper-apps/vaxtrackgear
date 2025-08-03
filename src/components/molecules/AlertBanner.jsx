@@ -51,7 +51,7 @@ const AlertBanner = ({
             {message && (
               <p className="mt-1 text-sm opacity-90">{message}</p>
             )}
-            {items.length > 0 && (
+{items.length > 0 && (
               <div className="mt-3">
                 <div className="flex flex-wrap gap-2">
                   {items.slice(0, 5).map((item, index) => (
@@ -60,7 +60,12 @@ const AlertBanner = ({
                       variant={severity === "warning" ? "expiring" : "expired"}
                       size="sm"
                     >
-                      {item.commercialName} ({item.lotNumber})
+                      {item.lotNumber 
+                        ? `${item.commercialName} (${item.lotNumber})`
+                        : item.commercialName && item.genericName 
+                          ? `${item.commercialName} (${item.genericName})`
+                          : item.commercialName || item.genericName || 'Unknown Vaccine'
+                      }
                     </Badge>
                   ))}
                   {items.length > 5 && (

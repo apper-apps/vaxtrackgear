@@ -34,7 +34,9 @@ export const getExpiredVaccines = (vaccines) => {
 };
 
 export const getLowStockVaccines = (vaccines, threshold = 5) => {
-  return vaccines.filter(vaccine => 
+  // First aggregate vaccines by name, then filter by stock threshold
+  const aggregatedVaccines = aggregateVaccinesByName(vaccines);
+  return aggregatedVaccines.filter(vaccine => 
     vaccine.quantityOnHand > 0 && vaccine.quantityOnHand <= threshold
   );
 };
@@ -107,6 +109,7 @@ export const aggregateVaccinesByName = (vaccines) => {
       existing.administeredDoses += vaccine.administeredDoses || 0;
     } else {
       aggregatedMap.set(key, {
+        Id: vaccine.Id, // Include Id for compatibility with AlertBanner
         commercialName: vaccine.commercialName,
         genericName: vaccine.genericName,
         quantityOnHand: vaccine.quantityOnHand || 0,
