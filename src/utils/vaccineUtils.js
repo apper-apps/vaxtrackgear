@@ -91,6 +91,29 @@ export const getUniqueVaccinesByName = (vaccines) => {
   return Array.from(uniqueMap.values());
 };
 
+export const aggregateVaccinesByName = (vaccines) => {
+  const aggregatedMap = new Map();
+  
+  vaccines.forEach(vaccine => {
+    const key = `${vaccine.commercialName}-${vaccine.genericName}`;
+    
+    if (aggregatedMap.has(key)) {
+      const existing = aggregatedMap.get(key);
+      existing.quantityOnHand += vaccine.quantityOnHand || 0;
+      existing.administeredDoses += vaccine.administeredDoses || 0;
+    } else {
+      aggregatedMap.set(key, {
+        commercialName: vaccine.commercialName,
+        genericName: vaccine.genericName,
+        quantityOnHand: vaccine.quantityOnHand || 0,
+        administeredDoses: vaccine.administeredDoses || 0
+      });
+    }
+  });
+  
+  return Array.from(aggregatedMap.values());
+};
+
 export const formatVaccineDisplayName = (vaccine) => {
   return `${vaccine.commercialName} (${vaccine.genericName})`;
 };

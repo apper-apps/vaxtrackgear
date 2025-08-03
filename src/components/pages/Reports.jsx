@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
+import { VaccineService } from "@/services/api/VaccineService";
+import ApperIcon from "@/components/ApperIcon";
 import FormField from "@/components/molecules/FormField";
 import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
-import ApperIcon from "@/components/ApperIcon";
-import { VaccineService } from "@/services/api/VaccineService";
+import Inventory from "@/components/pages/Inventory";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
 import { formatDate, getExpirationStatus } from "@/utils/dateUtils";
 import { getStockStatus } from "@/utils/vaccineUtils";
 
@@ -38,11 +39,11 @@ const Reports = () => {
     loadVaccines();
   }, []);
 
-  const generateReport = () => {
+const generateReport = async () => {
     let reportData = [];
     let reportTitle = "";
     
-switch (reportType) {
+    switch (reportType) {
       case "current-inventory":
         reportData = vaccines;
         reportTitle = "Current Inventory Report";
@@ -72,6 +73,15 @@ switch (reportType) {
         reportData = vaccines.filter(vaccine => vaccine.quantityOnHand === 0);
         reportTitle = "Out of Stock Report";
         break;
+      case "orders":
+        const { aggregateVaccinesByName } = await import("@/utils/vaccineUtils");
+        const aggregatedVaccines = aggregateVaccinesByName(vaccines);
+        reportData = aggregatedVaccines.filter(vaccine => {
+          const status = getStockStatus(vaccine.quantityOnHand);
+          return status === "low-stock" || status === "out-of-stock";
+        });
+        reportTitle = "Orders Report - Low/Out of Stock";
+        break;
       case "administration-summary":
         reportData = vaccines.filter(vaccine => vaccine.administeredDoses > 0);
         reportTitle = "Administration Summary Report";
@@ -83,10 +93,17 @@ switch (reportType) {
     return { data: reportData, title: reportTitle };
   };
 
-const exportToCSV = () => {
-    const { data, title } = generateReport();
+const exportToCSV = async () => {
+    const { data, title } = await generateReport();
     
-    const headers = [
+    const isOrdersReport = reportType === "orders";
+    const headers = isOrdersReport ? [
+      "Commercial Name",
+      "Generic Name", 
+      "Total Quantity On Hand",
+      "Total Administered Doses",
+      "Stock Status"
+    ] : [
       "Commercial Name",
       "Generic Name", 
       "Lot Number",
@@ -99,7 +116,13 @@ const exportToCSV = () => {
     
     const csvContent = [
       headers.join(","),
-      ...data.map(vaccine => [
+      ...data.map(vaccine => isOrdersReport ? [
+        `"${vaccine.commercialName}"`,
+        `"${vaccine.genericName}"`,
+        vaccine.quantityOnHand,
+        vaccine.administeredDoses || 0,
+        `"${getStockStatus(vaccine.quantityOnHand)}"`
+      ].join(",") : [
         `"${vaccine.commercialName}"`,
         `"${vaccine.genericName}"`,
         `"${vaccine.lotNumber}"`,
@@ -122,8 +145,8 @@ const exportToCSV = () => {
     document.body.removeChild(link);
   };
 
-  const exportToPDF = () => {
-    const { data, title } = generateReport();
+const exportToPDF = async () => {
+    const { data, title } = await generateReport();
     
     try {
       const doc = new jsPDF();
@@ -139,8 +162,15 @@ const exportToCSV = () => {
       doc.text(`Generated on: ${format(new Date(), "PPP")}`, 20, 35);
       doc.text(`Total Records: ${data.length}`, 20, 42);
       
-      // Prepare table data
-      const headers = [
+// Prepare table data
+      const isOrdersReport = reportType === "orders";
+      const headers = isOrdersReport ? [
+        "Commercial Name",
+        "Generic Name",
+        "Total Qty On Hand", 
+        "Total Administered",
+        "Stock Status"
+      ] : [
         "Commercial Name",
         "Generic Name", 
         "Lot Number",
@@ -148,11 +178,17 @@ const exportToCSV = () => {
         "Qty On Hand",
         "Administered",
         "Status"
-];
+      ];
       
       const tableData = data
         .filter(vaccine => vaccine.quantityOnHand > 0)
-        .map(vaccine => [
+        .map(vaccine => isOrdersReport ? [
+          vaccine.commercialName || '',
+          vaccine.genericName || '',
+          vaccine.quantityOnHand?.toString() || '0',
+          (vaccine.administeredDoses || 0).toString(),
+          getStockStatus(vaccine.quantityOnHand)
+        ] : [
           vaccine.commercialName || '',
           vaccine.genericName || '',
           vaccine.lotNumber || '',
@@ -233,9 +269,20 @@ const exportToCSV = () => {
 
   if (error) {
     return <Error message={error} onRetry={loadVaccines} />;
-  }
+}
 
-  const { data: reportData, title: reportTitle } = generateReport();
+  const [reportData, setReportData] = useState([]);
+  const [reportTitle, setReportTitle] = useState("");
+
+  useEffect(() => {
+    const updateReport = async () => {
+      const { data, title } = await generateReport();
+      setReportData(data);
+      setReportTitle(title);
+    };
+    
+    updateReport();
+  }, [vaccines, reportType]);
 
   return (
     <div className="space-y-6">
@@ -256,11 +303,12 @@ const exportToCSV = () => {
               onChange={(e) => setReportType(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
             >
-              <option value="current-inventory">Current Inventory</option>
+<option value="current-inventory">Current Inventory</option>
               <option value="expiring-soon">Expiring Soon (30 Days)</option>
               <option value="expired">Expired Vaccines</option>
               <option value="low-stock">Low Stock Alert</option>
               <option value="out-of-stock">Out of Stock Report</option>
+              <option value="orders">Orders</option>
               <option value="administration-summary">Administration Summary</option>
             </select>
           </FormField>
@@ -312,7 +360,7 @@ const exportToCSV = () => {
         
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+<thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Vaccine Name
@@ -320,17 +368,21 @@ const exportToCSV = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Generic Name
                 </th>
+                {reportType !== "orders" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Lot Number
+                  </th>
+                )}
+                {reportType !== "orders" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Expiration Date
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Lot Number
+                  {reportType === "orders" ? "Total Qty On Hand" : "Qty On Hand"}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Expiration Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Qty On Hand
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Administered
+                  {reportType === "orders" ? "Total Administered" : "Administered"}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -338,20 +390,24 @@ const exportToCSV = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {reportData.map((vaccine) => (
-                <tr key={vaccine.Id} className="hover:bg-gray-50">
+{reportData.map((vaccine, index) => (
+                <tr key={vaccine.Id || `${vaccine.commercialName}-${vaccine.genericName}-${index}`} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="font-medium text-gray-900">{vaccine.commercialName}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                     {vaccine.genericName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-600">
-                    {vaccine.lotNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                    {formatDate(vaccine.expirationDate)}
-                  </td>
+                  {reportType !== "orders" && (
+                    <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-600">
+                      {vaccine.lotNumber}
+                    </td>
+                  )}
+                  {reportType !== "orders" && (
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {formatDate(vaccine.expirationDate)}
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`font-medium ${
                       vaccine.quantityOnHand === 0 ? "text-red-600" :
@@ -364,7 +420,16 @@ const exportToCSV = () => {
                     {vaccine.administeredDoses || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(vaccine)}
+                    {reportType === "orders" ? (
+                      <Badge variant={
+                        vaccine.quantityOnHand === 0 ? "error" : 
+                        vaccine.quantityOnHand <= 5 ? "warning" : "success"
+                      }>
+                        {getStockStatus(vaccine.quantityOnHand).replace("-", " ").toUpperCase()}
+                      </Badge>
+                    ) : (
+                      getStatusBadge(vaccine)
+                    )}
                   </td>
                 </tr>
               ))}
