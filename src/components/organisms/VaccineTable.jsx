@@ -19,73 +19,136 @@ const VaccineTable = ({
 const [sortBy, setSortBy] = useState("commercialName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [adminDoses, setAdminDoses] = useState({});
-const [quantityEdits, setQuantityEdits] = useState({});
-  const [passwordPrompt, setPasswordPrompt] = useState({ show: false, vaccineId: null, currentQuantity: null });
+const [fieldEdits, setFieldEdits] = useState({});
+  const [passwordPrompt, setPasswordPrompt] = useState({ 
+    show: false, 
+    vaccineId: null, 
+    fieldType: null, 
+    fieldName: null, 
+    currentValue: null 
+  });
   const [passwordInput, setPasswordInput] = useState('');
-  const handleQuantityEdit = (vaccineId, currentQuantity) => {
+const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
+    const fieldLabels = {
+      'lotNumber': 'Lot Number',
+      'expirationDate': 'Expiration Date', 
+      'receivedDate': 'Received Date',
+      'quantityOnHand': 'Quantity On Hand'
+    };
+
     setPasswordPrompt({
       show: true,
       vaccineId: vaccineId,
-      currentQuantity: currentQuantity
+      fieldType: fieldName,
+      fieldName: fieldLabels[fieldName] || fieldName,
+      currentValue: currentValue
     });
   };
 
-  const handleQuantityChange = (vaccineId, value) => {
-    const numValue = parseInt(value) || 0;
-    setQuantityEdits(prev => ({
+  const handleFieldChange = (vaccineId, fieldName, value) => {
+    const fieldKey = `${vaccineId}-${fieldName}`;
+    
+    let processedValue = value;
+    if (fieldName === 'quantityOnHand') {
+      processedValue = parseInt(value) || 0;
+    }
+    
+    setFieldEdits(prev => ({
       ...prev,
-      [vaccineId]: numValue
+      [fieldKey]: processedValue
     }));
   };
 
-  const handleSaveQuantity = (vaccine) => {
-    const newQuantity = quantityEdits[vaccine.Id];
+  const handleSaveField = (vaccine, fieldName) => {
+    const fieldKey = `${vaccine.Id}-${fieldName}`;
+    const newValue = fieldEdits[fieldKey];
     
-    if (newQuantity < 0) {
+    // Field-specific validation
+    if (fieldName === 'quantityOnHand' && newValue < 0) {
       toast.error("Quantity cannot be negative");
       return;
+    }
+    
+    if ((fieldName === 'expirationDate' || fieldName === 'receivedDate') && newValue) {
+      try {
+        new Date(newValue).toISOString();
+      } catch (error) {
+        toast.error("Please enter a valid date");
+        return;
+      }
     }
 
     const updatedVaccine = {
       ...vaccine,
-      quantityOnHand: newQuantity
+      [fieldName]: newValue
     };
 
     onUpdateVaccine(updatedVaccine);
-    setQuantityEdits(prev => {
+    setFieldEdits(prev => {
       const updated = { ...prev };
-      delete updated[vaccine.Id];
+      delete updated[fieldKey];
       return updated;
     });
     
-    toast.success(`Updated quantity for ${vaccine.commercialName}`);
+    const fieldLabels = {
+      'lotNumber': 'lot number',
+      'expirationDate': 'expiration date', 
+      'receivedDate': 'received date',
+      'quantityOnHand': 'quantity'
+    };
+    
+    toast.success(`Updated ${fieldLabels[fieldName]} for ${vaccine.commercialName}`);
   };
 
-  const handleCancelQuantity = (vaccineId) => {
-    setQuantityEdits(prev => {
+  const handleCancelField = (vaccineId, fieldName) => {
+    const fieldKey = `${vaccineId}-${fieldName}`;
+    setFieldEdits(prev => {
       const updated = { ...prev };
-      delete updated[vaccineId];
+      delete updated[fieldKey];
       return updated;
     });
-};
+  };
 
-const handlePasswordSubmit = () => {
+  const isFieldEditing = (vaccineId, fieldName) => {
+    const fieldKey = `${vaccineId}-${fieldName}`;
+    return fieldEdits.hasOwnProperty(fieldKey);
+  };
+
+  const getFieldValue = (vaccineId, fieldName) => {
+    const fieldKey = `${vaccineId}-${fieldName}`;
+    return fieldEdits[fieldKey];
+  };
+
+  const handlePasswordSubmit = () => {
     if (passwordInput === "Office6700$#") {
-      setQuantityEdits(prev => ({
+      const fieldKey = `${passwordPrompt.vaccineId}-${passwordPrompt.fieldType}`;
+      setFieldEdits(prev => ({
         ...prev,
-        [passwordPrompt.vaccineId]: passwordPrompt.currentQuantity
+        [fieldKey]: passwordPrompt.currentValue
       }));
-      setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+      setPasswordPrompt({ 
+        show: false, 
+        vaccineId: null, 
+        fieldType: null, 
+        fieldName: null, 
+        currentValue: null 
+      });
       setPasswordInput('');
-      toast.success("Password verified. You can now edit the quantity.");
+      toast.success(`Password verified. You can now edit the ${passwordPrompt.fieldName}.`);
     } else {
       toast.error("Invalid password. Access denied.");
       setPasswordInput('');
     }
   };
 
-const handlePasswordCancel = () => {
-    setPasswordPrompt({ show: false, vaccineId: null, currentQuantity: null });
+  const handlePasswordCancel = () => {
+    setPasswordPrompt({ 
+      show: false, 
+      vaccineId: null, 
+      fieldType: null, 
+      fieldName: null, 
+      currentValue: null 
+    });
     setPasswordInput('');
   };
 const columns = [
@@ -201,43 +264,151 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                   {vaccine.genericName}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap font-mono text-sm text-gray-600">
-                  {vaccine.lotNumber}
-                </td>
-<td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                  {formatDate(vaccine.expirationDate)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                  {formatDate(vaccine.receivedDate)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {quantityEdits.hasOwnProperty(vaccine.Id) ? (
+<td className="px-6 py-4 whitespace-nowrap font-mono text-sm">
+                  {isFieldEditing(vaccine.Id, 'lotNumber') ? (
                     <div className="flex items-center space-x-2">
                       <Input
-                        type="number"
-                        min="0"
-                        value={quantityEdits[vaccine.Id]}
-                        onChange={(e) => handleQuantityChange(vaccine.Id, e.target.value)}
-                        className="w-20 text-center"
+                        type="text"
+                        value={getFieldValue(vaccine.Id, 'lotNumber')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'lotNumber', e.target.value)}
+                        className="w-32 text-sm"
                         size="sm"
                       />
                       <Button
                         variant="accent"
                         size="sm"
-                        onClick={() => handleSaveQuantity(vaccine)}
+                        onClick={() => handleSaveField(vaccine, 'lotNumber')}
                       >
                         <ApperIcon name="Check" className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCancelQuantity(vaccine.Id)}
+                        onClick={() => handleCancelField(vaccine.Id, 'lotNumber')}
                       >
                         <ApperIcon name="X" className="h-3 w-3" />
                       </Button>
                     </div>
                   ) : (
+                    <div className="flex items-center space-x-2 group">
+                      <span className="text-gray-600">{vaccine.lotNumber}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFieldEdit(vaccine.Id, 'lotNumber', vaccine.lotNumber)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ApperIcon name="Edit2" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </td>
+<td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'expirationDate') ? (
                     <div className="flex items-center space-x-2">
+                      <Input
+                        type="date"
+                        value={getFieldValue(vaccine.Id, 'expirationDate')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'expirationDate', e.target.value)}
+                        className="w-36 text-sm"
+                        size="sm"
+                      />
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        onClick={() => handleSaveField(vaccine, 'expirationDate')}
+                      >
+                        <ApperIcon name="Check" className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancelField(vaccine.Id, 'expirationDate')}
+                      >
+                        <ApperIcon name="X" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 group">
+                      <span className="text-gray-600">{formatDate(vaccine.expirationDate)}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFieldEdit(vaccine.Id, 'expirationDate', vaccine.expirationDate)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ApperIcon name="Edit2" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </td>
+<td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'receivedDate') ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="date"
+                        value={getFieldValue(vaccine.Id, 'receivedDate')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'receivedDate', e.target.value)}
+                        className="w-36 text-sm"
+                        size="sm"
+                      />
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        onClick={() => handleSaveField(vaccine, 'receivedDate')}
+                      >
+                        <ApperIcon name="Check" className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancelField(vaccine.Id, 'receivedDate')}
+                      >
+                        <ApperIcon name="X" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 group">
+                      <span className="text-gray-600">{formatDate(vaccine.receivedDate)}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFieldEdit(vaccine.Id, 'receivedDate', vaccine.receivedDate)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ApperIcon name="Edit2" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </td>
+<td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'quantityOnHand') ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={getFieldValue(vaccine.Id, 'quantityOnHand')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'quantityOnHand', e.target.value)}
+                        className="w-20 text-center"
+                        size="sm"
+                      />
+                      <Button
+                        variant="accent"
+                        size="sm"
+                        onClick={() => handleSaveField(vaccine, 'quantityOnHand')}
+                      >
+                        <ApperIcon name="Check" className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancelField(vaccine.Id, 'quantityOnHand')}
+                      >
+                        <ApperIcon name="X" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 group">
                       <span className={cn(
                         "font-medium",
                         vaccine.quantityOnHand === 0 ? "text-red-600" :
@@ -248,7 +419,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleQuantityEdit(vaccine.Id, vaccine.quantityOnHand)}
+                        onClick={() => handleFieldEdit(vaccine.Id, 'quantityOnHand', vaccine.quantityOnHand)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ApperIcon name="Edit2" className="h-3 w-3" />
@@ -301,7 +472,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
         </div>
       )}
 
-      {/* Password Prompt Dialog */}
+{/* Password Prompt Dialog */}
       {passwordPrompt.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
@@ -309,9 +480,9 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
               Password Required
             </h3>
             <p className="text-gray-600 mb-4">
-              Please enter the password to edit quantity on hand:
+              Please enter the password to edit {passwordPrompt.fieldName}:
             </p>
-<Input
+            <Input
               type="password"
               placeholder="Enter password"
               value={passwordInput}
@@ -333,14 +504,14 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
               </Button>
               <Button
                 variant="accent"
-onClick={handlePasswordSubmit}
+                onClick={handlePasswordSubmit}
               >
                 Submit
               </Button>
             </div>
           </div>
         </div>
-)}
+      )}
     </Card>
   );
 };
