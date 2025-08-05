@@ -29,7 +29,9 @@ const Header = ({ onMenuClick, className }) => {
           </Button>
 <div className="flex items-center space-x-3">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston, PA</h1>
+              <h1 className="text-lg font-semibold text-gray-900">
+                {user?.accounts?.[0]?.companyName || user?.companyName || 'Pediatric Clinic'}
+              </h1>
               <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
           </div>
