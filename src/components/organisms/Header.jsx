@@ -28,8 +28,19 @@ const Header = ({ onMenuClick, className }) => {
             <ApperIcon name="Menu" className="h-5 w-5" />
           </Button>
 <div className="flex items-center space-x-3">
+            {isAuthenticated && user?.emailAddress === 'office@pediatricsofsugarland.com' && (
+              <img 
+                src="https://pediatricsofsugarland.com/wp-content/uploads/2020/09/emailx300.png" 
+                alt="Pediatrics of Sugar Land Logo" 
+                className="h-10 w-auto"
+              />
+            )}
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Pediatrics Houston, PA</h1>
+              <h1 className="text-lg font-semibold text-gray-900">
+                {isAuthenticated && user?.emailAddress === 'office@pediatricsofsugarland.com' 
+                  ? 'Pediatrics of Sugar Land' 
+                  : 'Pediatrics Houston, PA'}
+              </h1>
               <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
           </div>
