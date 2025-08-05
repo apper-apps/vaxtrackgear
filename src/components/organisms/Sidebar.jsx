@@ -1,9 +1,21 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { cn } from "@/utils/cn";
 import NavItem from "@/components/molecules/NavItem";
 import ApperIcon from "@/components/ApperIcon";
-
 const Sidebar = ({ isOpen, onClose, className }) => {
+  // Get user email from Redux state
+  const { user } = useSelector((state) => state.user);
+  const userEmail = user?.emailAddress || '';
+  
+  // Dynamic logo and title based on user email
+  const isSugarLandUser = userEmail === 'office@pediatricsofsugarland.com';
+  const logoUrl = isSugarLandUser 
+    ? 'https://pediatricsofsugarland.com/wp-content/uploads/2020/09/emailx300.png'
+    : 'https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png';
+  const title = isSugarLandUser ? 'Pediatrics of Sugar Land' : 'Pediatrics Houston, PA';
+  const logoAlt = isSugarLandUser ? 'Pediatrics of Sugar Land Logo' : 'Pediatrics Houston Logo';
+  
   const navItems = [
     { to: "/", icon: "BarChart3", label: "Dashboard" },
     { to: "/inventory", icon: "Package", label: "Inventory" },
@@ -31,8 +43,8 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="flex items-center px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col items-center w-full">
             <img 
-              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
-              alt="Pediatrics Houston Logo" 
+              src={logoUrl}
+              alt={logoAlt}
               className="h-12 rounded-lg object-contain"
             />
           </div>
@@ -47,7 +59,7 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="px-4 py-4 border-t border-gray-200">
 <div className="flex items-center text-sm text-gray-600">
 <ApperIcon name="Shield" className="h-4 w-4 mr-2" />
-            <span>Pediatrics Houston, PA</span>
+            <span>{title}</span>
           </div>
         </div>
       </aside>
@@ -60,8 +72,8 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col items-center w-full">
             <img 
-              src="https://pediatricshouston.com/wp-content/uploads/2025/08/1751496694247-300finallogomobile.png" 
-              alt="Pediatrics Houston Logo" 
+              src={logoUrl}
+              alt={logoAlt}
               className="h-12 rounded-lg object-contain"
             />
           </div>
@@ -82,7 +94,7 @@ const Sidebar = ({ isOpen, onClose, className }) => {
 <div className="px-4 py-4 border-t border-gray-200">
 <div className="flex items-center text-sm text-gray-600">
 <ApperIcon name="Shield" className="h-4 w-4 mr-2" />
-            <span>Pediatrics Houston, PA</span>
+            <span>{title}</span>
           </div>
         </div>
       </div>
