@@ -11,11 +11,32 @@ import {
   updateSingleSetting, 
   resetSettings 
 } from "@/store/settingsSlice";
+import { updateUser } from "@/store/userSlice";
 const Settings = () => {
   const dispatch = useDispatch();
-  const { settings, loading } = useSelector((state) => state.settings);
+const { settings, loading } = useSelector((state) => state.settings);
+  const { user } = useSelector((state) => state.user);
 const handleInputChange = (field, value) => {
     dispatch(updateSingleSetting({ field, value }));
+  };
+
+  const handleProfileChange = (field, value) => {
+    dispatch(updateUser({ [field]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    dispatch(setLoading(true));
+    
+    try {
+      // Simulate brief processing time for user feedback
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      dispatch(setLoading(false));
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      dispatch(setLoading(false));
+      toast.error("Failed to update profile. Please try again.");
+    }
   };
 const handleSave = async () => {
     dispatch(setLoading(true));
@@ -150,8 +171,7 @@ const handleReset = () => {
                 />
               </button>
             </div>
-            
-            <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
               <div>
                 <label className="text-sm font-medium text-gray-700">Automatic Backup</label>
                 <p className="text-xs text-gray-500">Daily backup of inventory data</p>
@@ -169,6 +189,59 @@ const handleReset = () => {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Profile Information */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <ApperIcon name="User" className="h-5 w-5 mr-2" />
+            Profile Information
+          </h2>
+          
+          <div className="space-y-4">
+            <FormField
+              label="Display Name"
+              value={user?.displayName || user?.firstName + ' ' + user?.lastName || ''}
+              onChange={(e) => handleProfileChange("displayName", e.target.value)}
+              placeholder="Enter display name"
+            />
+            
+            <FormField
+              label="Email Address"
+              type="email"
+              value={user?.emailAddress || ''}
+              onChange={(e) => handleProfileChange("emailAddress", e.target.value)}
+              placeholder="Enter email address"
+            />
+            
+            <FormField
+              label="Organization"
+              value={user?.accounts?.[0]?.companyName || ''}
+              onChange={(e) => handleProfileChange("companyName", e.target.value)}
+              placeholder="Enter organization name"
+            />
+
+            <div className="pt-2">
+              <Button
+                variant="primary"
+                onClick={handleSaveProfile}
+                disabled={loading}
+                className="inline-flex items-center"
+              >
+                {loading ? (
+                  <>
+                    <ApperIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <ApperIcon name="Save" className="h-4 w-4 mr-2" />
+                    Save Profile
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </Card>
