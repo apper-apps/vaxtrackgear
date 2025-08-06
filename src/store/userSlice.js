@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 // Display name mapping for specific users
 const displayNameMap = {
   'office@pediatricsofsugarland.com': 'Pediatrics of Sugar Land',
-  'netatworld@gmail.com': 'Pediatrics Houston, PA'
+  'netatworld@gmail.com': 'Pediatrics of Southwest Houston'
 };
 
 const initialState = {
