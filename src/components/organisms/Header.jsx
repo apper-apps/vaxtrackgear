@@ -6,15 +6,24 @@ import ApperIcon from "@/components/ApperIcon";
 import { AuthContext } from "@/App";
 
 const Header = ({ onMenuClick, className }) => {
-  const { logout } = useContext(AuthContext);
+const { logout } = useContext(AuthContext);
   const { user, isAuthenticated } = useSelector((state) => state.user);
+
+  // Helper function to map user emails to organization names
+  const getOrganizationName = (userEmail) => {
+    const organizationMapping = {
+      'netatworld@gmail.com': 'Pediatrics of Southwest Houston',
+      'office@pediatricsofsugarland.com': 'Pediatrics of Sugar Land'
+    };
+    
+    return organizationMapping[userEmail] || null;
+  };
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
       await logout();
     }
   };
-
   return (
     <header className={cn("bg-white border-b border-gray-200 px-4 lg:px-6 py-4", className)}>
       <div className="flex items-center justify-between">
@@ -29,8 +38,8 @@ const Header = ({ onMenuClick, className }) => {
           </Button>
 <div className="flex items-center space-x-3">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                {user?.accounts?.[0]?.companyName || user?.companyName || 'Pediatric Clinic'}
+<h1 className="text-lg font-semibold text-gray-900">
+                {getOrganizationName(user?.emailAddress) || user?.accounts?.[0]?.companyName || user?.companyName || 'Pediatric Clinic'}
               </h1>
               <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
