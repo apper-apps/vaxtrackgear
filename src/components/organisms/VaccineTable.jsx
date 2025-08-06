@@ -119,12 +119,8 @@ const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
     return fieldEdits[fieldKey];
   };
 
-const handlePasswordSubmit = () => {
-    // Find the vaccine record to get its editPassword
-    const vaccine = vaccines.find(v => v.Id === passwordPrompt.vaccineId);
-    const correctPassword = vaccine?.editPassword || "Office6700$#"; // Fallback to default if no password set
-    
-    if (passwordInput === correctPassword) {
+  const handlePasswordSubmit = () => {
+    if (passwordInput === "Office6700$#") {
       const fieldKey = `${passwordPrompt.vaccineId}-${passwordPrompt.fieldType}`;
       setFieldEdits(prev => ({
         ...prev,
