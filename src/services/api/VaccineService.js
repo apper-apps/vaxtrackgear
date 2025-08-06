@@ -9,7 +9,7 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-      const params = {
+const params = {
         fields: [
           { field: { Name: "Name" } },
           { field: { Name: "Tags" } },
@@ -21,7 +21,8 @@ export const VaccineService = {
           { field: { Name: "expirationDate" } },
           { field: { Name: "receivedDate" } },
           { field: { Name: "quantityOnHand" } },
-          { field: { Name: "administeredDoses" } }
+          { field: { Name: "administeredDoses" } },
+          { field: { Name: "editPassword" } }
         ],
         orderBy: [
           {
@@ -62,7 +63,7 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-      const params = {
+const params = {
         fields: [
           { field: { Name: "Name" } },
           { field: { Name: "Tags" } },
@@ -74,7 +75,8 @@ export const VaccineService = {
           { field: { Name: "expirationDate" } },
           { field: { Name: "receivedDate" } },
           { field: { Name: "quantityOnHand" } },
-          { field: { Name: "administeredDoses" } }
+          { field: { Name: "administeredDoses" } },
+          { field: { Name: "editPassword" } }
         ]
       };
 
@@ -177,7 +179,7 @@ export const VaccineService = {
         ...(updatedData.administeredDoses !== undefined && { administeredDoses: parseInt(updatedData.administeredDoses) })
       };
 
-      const params = {
+const params = {
         records: [updateData]
       };
 
