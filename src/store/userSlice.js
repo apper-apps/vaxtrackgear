@@ -15,7 +15,7 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-setUser: (state, action) => {
+    setUser: (state, action) => {
       // CRITICAL: Always use deep cloning to avoid reference issues
       // This prevents potential issues with object mutations
       const userData = JSON.parse(JSON.stringify(action.payload));
@@ -28,16 +28,6 @@ setUser: (state, action) => {
       state.user = userData;
       state.isAuthenticated = !!action.payload;
     },
-    updateUser: (state, action) => {
-      if (state.user) {
-        // Update specific fields in the user object
-        const updates = action.payload;
-        state.user = {
-          ...state.user,
-          ...updates
-        };
-      }
-    },
     clearUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -45,5 +35,5 @@ setUser: (state, action) => {
   },
 });
 
-export const { setUser, updateUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;
