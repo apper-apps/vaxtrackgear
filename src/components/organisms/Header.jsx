@@ -30,7 +30,7 @@ const Header = ({ onMenuClick, className }) => {
 <div className="flex items-center space-x-3">
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                {user?.displayName || user?.accounts?.[0]?.organizationName || user?.organizationName || user?.companyName || 'Pediatric Clinic'}
+                {user?.accounts?.[0]?.companyName || user?.companyName || 'Pediatric Clinic'}
               </h1>
               <p className="text-sm text-gray-500">Pediatric Vaccine Management</p>
             </div>
