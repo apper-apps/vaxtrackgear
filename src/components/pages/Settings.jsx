@@ -5,7 +5,9 @@ import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import FormField from "@/components/molecules/FormField";
 import ApperIcon from "@/components/ApperIcon";
-import { 
+import { DatabaseExportService } from "@/services/api/DatabaseExportService";
+import { exportDatabaseToJSON } from "@/utils/vaccineUtils";
+import {
   setLoading, 
   updateSettings, 
   updateSingleSetting, 
@@ -17,7 +19,8 @@ const Settings = () => {
 const handleInputChange = (field, value) => {
     dispatch(updateSingleSetting({ field, value }));
   };
-const handleSave = async () => {
+
+  const handleSave = async () => {
     dispatch(setLoading(true));
     
     try {
@@ -40,9 +43,31 @@ const handleSave = async () => {
     }
   };
 
-const handleReset = () => {
+  const handleReset = () => {
     dispatch(resetSettings());
     toast.info("Settings reset to default values");
+  };
+
+  const handleExportDatabase = async () => {
+    dispatch(setLoading(true));
+    
+    try {
+      toast.info("Starting database export...");
+      
+      const exportResult = await DatabaseExportService.exportAllData();
+      
+      if (exportResult.success) {
+        exportDatabaseToJSON(exportResult);
+        toast.success("Database exported successfully!");
+      } else {
+        toast.error(exportResult.error || "Failed to export database");
+      }
+    } catch (error) {
+      console.error('Error during database export:', error);
+      toast.error("Failed to export database. Please try again.");
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -201,33 +226,60 @@ const handleReset = () => {
       </Card>
 
       {/* Action Buttons */}
-      <Card className="p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+<Card className="p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Database Export</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Export all database content to a JSON file that can be imported by other users.
+          </p>
           <Button
             variant="outline"
-            onClick={handleReset}
-            disabled={loading}
-          >
-            Reset to Defaults
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSave}
+            onClick={handleExportDatabase}
             disabled={loading}
             className="inline-flex items-center"
           >
             {loading ? (
               <>
                 <ApperIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                Exporting...
               </>
             ) : (
               <>
-                <ApperIcon name="Save" className="h-4 w-4 mr-2" />
-                Save Settings
+                <ApperIcon name="Download" className="h-4 w-4 mr-2" />
+                Export Database
               </>
             )}
           </Button>
+        </div>
+        
+        <div className="border-t pt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={loading}
+            >
+              Reset to Defaults
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={loading}
+              className="inline-flex items-center"
+            >
+              {loading ? (
+                <>
+                  <ApperIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <ApperIcon name="Save" className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </Card>
     </div>

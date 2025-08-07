@@ -1,3 +1,5 @@
+import React from "react";
+import Error from "@/components/ui/Error";
 export const getStockStatus = (quantityOnHand, lowStockThreshold = 5) => {
   if (quantityOnHand === 0) return "out-of-stock";
   if (quantityOnHand <= lowStockThreshold) return "low-stock";
@@ -214,5 +216,55 @@ export const getSearchSuggestions = (vaccines, searchTerm, limit = 10) => {
     }
   });
   
-  return [...exactMatches, ...partialMatches].slice(0, limit);
+return [...exactMatches, ...partialMatches].slice(0, limit);
+};
+
+export const exportDatabaseToJSON = (exportResult) => {
+  try {
+    if (!exportResult.success) {
+      throw new Error(exportResult.error || 'Export failed');
+    }
+
+    // Create the export structure
+    const exportStructure = {
+      metadata: exportResult.metadata,
+      tables: {}
+    };
+
+    // Process each table's data
+    Object.keys(exportResult.data).forEach(tableName => {
+      const tableData = exportResult.data[tableName];
+      exportStructure.tables[tableName] = {
+        recordCount: tableData.count,
+        success: tableData.success || false,
+        records: tableData.data || [],
+        ...(tableData.error && { error: tableData.error })
+      };
+    });
+
+    // Convert to JSON string with formatting
+    const jsonString = JSON.stringify(exportStructure, null, 2);
+
+    // Create blob and download
+    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `vaxtrack-database-export-${timestamp}.json`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    return true;
+return true;
+  } catch (error) {
+    console.error('Error generating database export file:', error);
+    throw error;
+  }
 };
