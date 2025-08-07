@@ -26,6 +26,7 @@ const loadSettingsFromStorage = () => {
 const initialState = {
   settings: loadSettingsFromStorage(),
   loading: false,
+  importLoading: false,
   error: null
 };
 
@@ -33,8 +34,11 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    setLoading: (state, action) => {
+setLoading: (state, action) => {
       state.loading = action.payload;
+    },
+    setImportLoading: (state, action) => {
+      state.importLoading = action.payload;
     },
     updateSettings: (state, action) => {
       state.settings = {
@@ -93,6 +97,7 @@ export const settingsSlice = createSlice({
 
 export const { 
   setLoading, 
+  setImportLoading,
   updateSettings, 
   updateSingleSetting, 
   resetSettings, 

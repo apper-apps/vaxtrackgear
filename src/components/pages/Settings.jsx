@@ -1,21 +1,18 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import FormField from "@/components/molecules/FormField";
-import ApperIcon from "@/components/ApperIcon";
 import { DatabaseExportService } from "@/services/api/DatabaseExportService";
+import ApperIcon from "@/components/ApperIcon";
+import FormField from "@/components/molecules/FormField";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import { resetSettings, setLoading, updateSettings, updateSingleSetting } from "@/store/settingsSlice";
 import { exportDatabaseToJSON } from "@/utils/vaccineUtils";
-import {
-  setLoading, 
-  updateSettings, 
-  updateSingleSetting, 
-  resetSettings 
-} from "@/store/settingsSlice";
 const Settings = () => {
   const dispatch = useDispatch();
-  const { settings, loading } = useSelector((state) => state.settings);
+const { settings, loading, importLoading } = useSelector((state) => state.settings);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
 const handleInputChange = (field, value) => {
     dispatch(updateSingleSetting({ field, value }));
   };
@@ -67,6 +64,50 @@ const handleInputChange = (field, value) => {
       toast.error("Failed to export database. Please try again.");
     } finally {
       dispatch(setLoading(false));
+    }
+};
+
+  const handleImportDatabase = async (file) => {
+    if (!file) return;
+    
+    dispatch(setLoading(true));
+    
+    try {
+      toast.info("Processing database import...");
+      
+      const result = await DatabaseExportService.importDatabaseFromJSON(file);
+      
+      if (result.success) {
+        toast.success(`Database imported successfully! ${result.summary}`);
+      } else {
+        toast.error(result.error || "Failed to import database");
+      }
+    } catch (error) {
+      console.error('Error during database import:', error);
+      toast.error("Failed to import database. Please check the file format and try again.");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    if (passwordInput === "Office6700$#") {
+      setShowPasswordModal(false);
+      setPasswordInput("");
+      // Trigger file input
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json';
+      fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleImportDatabase(file);
+        }
+      };
+      fileInput.click();
+    } else {
+      toast.error("Incorrect password. Access denied.");
+      setPasswordInput("");
     }
   };
   return (
@@ -251,8 +292,70 @@ const handleInputChange = (field, value) => {
             )}
           </Button>
         </div>
-        
-        <div className="border-t pt-4">
+<div className="mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Database Import</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Import database content from a JSON file. This operation requires administrator password.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => setShowPasswordModal(true)}
+            disabled={loading || importLoading}
+            className="inline-flex items-center"
+          >
+            {importLoading ? (
+              <>
+                <ApperIcon name="Loader2" className="h-4 w-4 mr-2 animate-spin" />
+                Importing...
+              </>
+            ) : (
+              <>
+                <ApperIcon name="Upload" className="h-4 w-4 mr-2" />
+                Import Database
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* Password Modal */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-w-sm mx-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Enter Administrator Password</h3>
+              <p className="text-sm text-gray-600 mb-4">
+              </p>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="Enter password"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 mb-4"
+                onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                autoFocus
+              />
+              <div className="flex justify-end space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setPasswordInput("");
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handlePasswordSubmit}
+                  disabled={!passwordInput.trim()}
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+<div className="border-t pt-4">
           <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
             <Button
               variant="outline"
