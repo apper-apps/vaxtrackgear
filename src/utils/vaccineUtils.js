@@ -259,10 +259,9 @@ export const exportDatabaseToJSON = (exportResult) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    }
+}
 
     return true;
-return true;
   } catch (error) {
     console.error('Error generating database export file:', error);
     throw error;
