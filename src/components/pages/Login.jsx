@@ -34,14 +34,6 @@ function Login() {
           </div>
         </div>
         <div id="authentication" />
-        <div className="text-center mt-4">
-          <p className="text-sm text-surface-600 dark:text-surface-400">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-primary-500 hover:text-primary-600">
-              Sign up
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );
