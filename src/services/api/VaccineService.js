@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import React from "react";
 
 export const VaccineService = {
   async getAll() {
@@ -261,7 +262,7 @@ export const VaccineService = {
 },
 
   async searchByName(searchTerm) {
-    try {
+try {
       if (!searchTerm || !searchTerm.trim()) {
         return [];
       }
@@ -272,7 +273,7 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-const params = {
+      const params = {
         fields: [
           { field: { Name: "Name" } },
           { field: { Name: "commercialName" } },
@@ -338,3 +339,5 @@ const params = {
     }
   }
 };
+
+export default VaccineService;
