@@ -158,7 +158,6 @@ const columns = [
     { key: "expirationDate", label: "Expiration Date", sortable: true },
     { key: "receivedDate", label: "Received Date", sortable: true },
     { key: "quantityOnHand", label: "Quantity On Hand", sortable: true },
-    { key: "status", label: "Status", sortable: false },
     ...(showAdministration ? [{ key: "administration", label: "Administer", sortable: false }] : [])
   ];
 
@@ -426,10 +425,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                       </Button>
                     </div>
                   )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(vaccine)}
-                </td>
+</td>
                 {showAdministration && (
                   <td className="px-6 py-4 whitespace-nowrap">
                     {vaccine.quantityOnHand > 0 ? (
