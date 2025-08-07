@@ -53,7 +53,7 @@ const generateReport = async () => {
     let reportData = [];
     let reportTitle = "";
     
-    switch (reportType) {
+switch (reportType) {
       case "current-inventory":
         reportData = vaccines;
         reportTitle = "Current Inventory Report";
@@ -96,6 +96,22 @@ const generateReport = async () => {
         reportData = vaccines.filter(vaccine => vaccine.administeredDoses > 0);
         reportTitle = "Administration Summary Report";
         break;
+      case "vaccine-inventory-template":
+        // Create template data with only commercial and generic names, other fields empty
+        const { getUniqueVaccinesByName } = await import("@/utils/vaccineUtils");
+        const uniqueVaccines = getUniqueVaccinesByName(vaccines);
+        reportData = uniqueVaccines.map(vaccine => ({
+          Id: vaccine.Id,
+          commercialName: vaccine.commercialName || '',
+          genericName: vaccine.genericName || '',
+          lotNumber: '',
+          expirationDate: '',
+          receivedDate: '',
+          quantityOnHand: 0,
+          administeredDoses: 0
+        }));
+        reportTitle = "Vaccine Inventory Template";
+        break;
       default:
         reportData = vaccines;
         reportTitle = "Vaccine Inventory Report";
@@ -106,7 +122,9 @@ const generateReport = async () => {
 const exportToCSV = async () => {
     const { data, title } = await generateReport();
     
-    const isOrdersReport = reportType === "orders";
+const isOrdersReport = reportType === "orders";
+    const isTemplateReport = reportType === "vaccine-inventory-template";
+    
     const headers = isOrdersReport ? [
       "Commercial Name",
       "Generic Name", 
@@ -126,22 +144,39 @@ const exportToCSV = async () => {
     
     const csvContent = [
       headers.join(","),
-      ...data.map(vaccine => isOrdersReport ? [
-        `"${vaccine.commercialName}"`,
-        `"${vaccine.genericName}"`,
-        vaccine.quantityOnHand,
-        vaccine.administeredDoses || 0,
-        `"${getStockStatus(vaccine.quantityOnHand)}"`
-      ].join(",") : [
-        `"${vaccine.commercialName}"`,
-        `"${vaccine.genericName}"`,
-        `"${vaccine.lotNumber}"`,
-        formatDate(vaccine.expirationDate),
-        formatDate(vaccine.receivedDate),
-        vaccine.quantityOnHand,
-        vaccine.administeredDoses || 0,
-        `"${getExpirationStatus(vaccine.expirationDate)}"`
-      ].join(","))
+      ...data.map(vaccine => {
+        if (isOrdersReport) {
+          return [
+            `"${vaccine.commercialName}"`,
+            `"${vaccine.genericName}"`,
+            vaccine.quantityOnHand,
+            vaccine.administeredDoses || 0,
+            `"${getStockStatus(vaccine.quantityOnHand)}"`
+          ].join(",");
+        } else if (isTemplateReport) {
+          return [
+            `"${vaccine.commercialName}"`,
+            `"${vaccine.genericName}"`,
+            `""`, // Empty lot number
+            `""`, // Empty expiration date
+            `""`, // Empty received date
+            `""`, // Empty quantity
+            `""`, // Empty administered doses
+            `""` // Empty status
+          ].join(",");
+        } else {
+          return [
+            `"${vaccine.commercialName}"`,
+            `"${vaccine.genericName}"`,
+            `"${vaccine.lotNumber}"`,
+            formatDate(vaccine.expirationDate),
+            formatDate(vaccine.receivedDate),
+            vaccine.quantityOnHand,
+            vaccine.administeredDoses || 0,
+            `"${getExpirationStatus(vaccine.expirationDate)}"`
+          ].join(",");
+        }
+      })
     ].join("\n");
     
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -173,7 +208,9 @@ const exportToPDF = async () => {
       doc.text(`Total Records: ${data.length}`, 20, 42);
       
 // Prepare table data
-      const isOrdersReport = reportType === "orders";
+const isOrdersReport = reportType === "orders";
+      const isTemplateReport = reportType === "vaccine-inventory-template";
+      
       const headers = isOrdersReport ? [
         "Commercial Name",
         "Generic Name",
@@ -190,24 +227,38 @@ const exportToPDF = async () => {
         "Status"
       ];
       
-      const tableData = data
-        .filter(vaccine => vaccine.quantityOnHand > 0)
-        .map(vaccine => isOrdersReport ? [
-          vaccine.commercialName || '',
-          vaccine.genericName || '',
-          vaccine.quantityOnHand?.toString() || '0',
-          (vaccine.administeredDoses || 0).toString(),
-          getStockStatus(vaccine.quantityOnHand)
-        ] : [
-          vaccine.commercialName || '',
-          vaccine.genericName || '',
-          vaccine.lotNumber || '',
-          formatDate(vaccine.expirationDate),
-          vaccine.quantityOnHand?.toString() || '0',
-          (vaccine.administeredDoses || 0).toString(),
-          getExpirationStatus(vaccine.expirationDate)
-        ]);
-      
+      const tableData = (isTemplateReport ? data : data.filter(vaccine => vaccine.quantityOnHand > 0))
+        .map(vaccine => {
+          if (isOrdersReport) {
+            return [
+              vaccine.commercialName || '',
+              vaccine.genericName || '',
+              vaccine.quantityOnHand?.toString() || '0',
+              (vaccine.administeredDoses || 0).toString(),
+              getStockStatus(vaccine.quantityOnHand)
+            ];
+          } else if (isTemplateReport) {
+            return [
+              vaccine.commercialName || '',
+              vaccine.genericName || '',
+              '', // Empty lot number
+              '', // Empty expiration date
+              '', // Empty quantity
+              '', // Empty administered
+              '' // Empty status
+            ];
+          } else {
+            return [
+              vaccine.commercialName || '',
+              vaccine.genericName || '',
+              vaccine.lotNumber || '',
+              formatDate(vaccine.expirationDate),
+              vaccine.quantityOnHand?.toString() || '0',
+              (vaccine.administeredDoses || 0).toString(),
+              getExpirationStatus(vaccine.expirationDate)
+            ];
+          }
+        });
       // Add table
       let yPosition = 55;
       const cellHeight = 8;
@@ -297,18 +348,19 @@ const exportToPDF = async () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 <FormField label="Report Type">
-            <select
+<select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
             >
-<option value="current-inventory">Current Inventory</option>
+              <option value="current-inventory">Current Inventory</option>
               <option value="expiring-soon">Expiring Soon (30 Days)</option>
               <option value="expired">Expired Vaccines</option>
               <option value="low-stock">Low Stock Alert</option>
               <option value="out-of-stock">Out of Stock Report</option>
               <option value="orders">Orders</option>
               <option value="administration-summary">Administration Summary</option>
+              <option value="vaccine-inventory-template">Vaccine Inventory Template</option>
             </select>
           </FormField>
           
