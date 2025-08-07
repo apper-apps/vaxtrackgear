@@ -141,6 +141,60 @@ export const hasExactMatch = (vaccines, searchTerm) => {
   );
 };
 
+export const exportVaccinesToCSV = (vaccines) => {
+  try {
+    // Define CSV headers
+    const headers = [
+      'Vaccine Name',
+      'Generic Name', 
+      'Lot Number',
+      'Quantity On Hand',
+      'Administered Doses',
+      'Expiration Date',
+      'Received Date',
+      'Stock Status'
+    ];
+
+    // Convert vaccines data to CSV rows
+    const csvRows = vaccines.map(vaccine => {
+      const expirationDate = vaccine.expirationDate ? new Date(vaccine.expirationDate).toLocaleDateString() : '';
+      const receivedDate = vaccine.receivedDate ? new Date(vaccine.receivedDate).toLocaleDateString() : '';
+      const stockStatus = getStockStatus(vaccine.quantityOnHand);
+      
+      return [
+        `"${vaccine.commercialName || vaccine.Name || ''}"`,
+        `"${vaccine.genericName || ''}"`,
+        `"${vaccine.lotNumber || ''}"`,
+        vaccine.quantityOnHand || 0,
+        vaccine.administeredDoses || 0,
+        `"${expirationDate}"`,
+        `"${receivedDate}"`,
+        `"${stockStatus}"`
+      ].join(',');
+    });
+
+    // Combine headers and data rows
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vaccine-inventory-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  } catch (error) {
+    console.error('Error generating CSV:', error);
+    throw error;
+  }
+};
+
 export const getSearchSuggestions = (vaccines, searchTerm, limit = 10) => {
   if (!searchTerm.trim()) return [];
   

@@ -189,7 +189,19 @@ setError("Failed to update vaccine. Please try again.");
       toast.error("Failed to export PDF. Please try again.");
     }
   };
-
+const handleExportCSV = async () => {
+    try {
+      toast.info("Generating CSV export...");
+      
+      const { exportVaccinesToCSV } = await import('@/utils/vaccineUtils');
+      exportVaccinesToCSV(filteredVaccines);
+      
+      toast.success("CSV exported successfully!");
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      toast.error("Failed to export CSV. Please try again.");
+    }
+  };
   useEffect(() => {
     loadVaccines();
   }, []);
@@ -209,21 +221,33 @@ setError("Failed to update vaccine. Please try again.");
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Vaccine Inventory</h1>
           <p className="text-gray-600">Manage and monitor your vaccine stock levels</p>
         </div>
-        <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 sm:items-center">
+<div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 sm:items-center">
           <SearchBar
             placeholder="Search vaccines, generic names, or lot numbers..."
             value={searchTerm}
             onChange={handleSearch}
             className="w-full sm:w-80"
           />
-          <Button
-            onClick={handleExportPDF}
-            variant="outline"
-            className="flex items-center gap-2 whitespace-nowrap"
-          >
-            <ApperIcon name="Download" size={16} />
-            Export to PDF
-          </Button>
+          <div className="relative">
+            <div className="flex gap-2">
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <ApperIcon name="Download" size={16} />
+                Export to PDF
+              </Button>
+              <Button
+                onClick={handleExportCSV}
+                variant="outline"
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <ApperIcon name="FileText" size={16} />
+                Export to CSV
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
