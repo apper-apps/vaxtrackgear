@@ -272,20 +272,12 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-      const params = {
+const params = {
         fields: [
           { field: { Name: "Name" } },
           { field: { Name: "commercialName" } },
           { field: { Name: "genericName" } },
           { field: { Name: "quantityOnHand" } }
-        ],
-        where: [
-          {
-            FieldName: "commercialName",
-            Operator: "Contains",
-            Values: [searchTerm],
-            Include: true
-          }
         ],
         whereGroups: [
           {
