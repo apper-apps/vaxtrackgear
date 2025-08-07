@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-import React from "react";
 
 export const VaccineService = {
   async getAll() {
@@ -262,7 +261,7 @@ export const VaccineService = {
 },
 
   async searchByName(searchTerm) {
-try {
+    try {
       if (!searchTerm || !searchTerm.trim()) {
         return [];
       }
@@ -279,6 +278,14 @@ try {
           { field: { Name: "commercialName" } },
           { field: { Name: "genericName" } },
           { field: { Name: "quantityOnHand" } }
+        ],
+        where: [
+          {
+            FieldName: "commercialName",
+            Operator: "Contains",
+            Values: [searchTerm],
+            Include: true
+          }
         ],
         whereGroups: [
           {
@@ -339,5 +346,3 @@ try {
     }
   }
 };
-
-export default VaccineService;
