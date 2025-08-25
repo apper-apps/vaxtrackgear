@@ -10,10 +10,11 @@ const { logout } = useContext(AuthContext);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   // Helper function to map user emails to organization names
-  const getOrganizationName = (userEmail) => {
+const getOrganizationName = (userEmail) => {
     const organizationMapping = {
       'netatworld@gmail.com': 'Pediatrics of Southwest Houston',
-      'office@pediatricsofsugarland.com': 'Pediatrics of Sugar Land'
+      'office@pediatricsofsugarland.com': 'Pediatrics of Sugar Land',
+      'office@pediatricshouston.com': 'Pediatrics of Southwest Houston'
     };
     
     return organizationMapping[userEmail] || null;
