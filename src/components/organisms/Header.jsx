@@ -50,9 +50,12 @@ const getOrganizationName = (userEmail) => {
         <div className="flex items-center space-x-4">
           {isAuthenticated && user && (
             <div className="flex items-center space-x-3">
-              <div className="text-right">
+<div className="text-right">
                 <p className="text-sm font-medium text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {user.firstName && user.firstName.toLowerCase() !== 'office' 
+                    ? `${user.firstName} ${user.lastName || ''}`.trim()
+                    : getOrganizationName(user?.emailAddress) || 'User'
+                  }
                 </p>
                 <p className="text-xs text-gray-500">{user.emailAddress}</p>
               </div>
