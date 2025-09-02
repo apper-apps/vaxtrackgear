@@ -58,48 +58,48 @@ case "current-inventory":
         reportTitle = "Current Inventory Report";
         break;
       case "expiring-soon":
-        reportData = vaccines.filter(vaccine => {
+        reportData = sortVaccines(vaccines.filter(vaccine => {
           const status = getExpirationStatus(vaccine.expirationDate);
           return status === "expiring";
-        });
+        }), "commercialName", "asc");
         reportTitle = "Vaccines Expiring Soon (30 Days)";
         break;
       case "expired":
-        reportData = vaccines.filter(vaccine => {
+        reportData = sortVaccines(vaccines.filter(vaccine => {
           const status = getExpirationStatus(vaccine.expirationDate);
           return status === "expired";
-        });
+        }), "commercialName", "asc");
         reportTitle = "Expired Vaccines Report";
         break;
       case "low-stock":
-        reportData = vaccines.filter(vaccine => {
+        reportData = sortVaccines(vaccines.filter(vaccine => {
           const status = getStockStatus(vaccine.quantityOnHand);
           return status === "low-stock" || status === "out-of-stock";
-        });
+        }), "commercialName", "asc");
         reportTitle = "Low Stock Report";
         break;
       case "out-of-stock":
-        reportData = vaccines.filter(vaccine => vaccine.quantityOnHand === 0);
+        reportData = sortVaccines(vaccines.filter(vaccine => vaccine.quantityOnHand === 0), "commercialName", "asc");
         reportTitle = "Out of Stock Report";
         break;
       case "orders":
         const { aggregateVaccinesByName } = await import("@/utils/vaccineUtils");
         const aggregatedVaccines = aggregateVaccinesByName(vaccines);
-        reportData = aggregatedVaccines.filter(vaccine => {
+        reportData = sortVaccines(aggregatedVaccines.filter(vaccine => {
           const status = getStockStatus(vaccine.quantityOnHand);
           return status === "low-stock" || status === "out-of-stock";
-        });
+        }), "commercialName", "asc");
         reportTitle = "Orders Report - Low/Out of Stock";
         break;
       case "administration-summary":
-        reportData = vaccines.filter(vaccine => vaccine.administeredDoses > 0);
+        reportData = sortVaccines(vaccines.filter(vaccine => vaccine.administeredDoses > 0), "commercialName", "asc");
         reportTitle = "Administration Summary Report";
         break;
       case "vaccine-inventory-template":
         // Create template data with only commercial and generic names, other fields empty
         const { getUniqueVaccinesByName } = await import("@/utils/vaccineUtils");
         const uniqueVaccines = getUniqueVaccinesByName(vaccines);
-        reportData = uniqueVaccines.map(vaccine => ({
+        reportData = sortVaccines(uniqueVaccines.map(vaccine => ({
           Id: vaccine.Id,
           commercialName: vaccine.commercialName || '',
           genericName: vaccine.genericName || '',
@@ -108,11 +108,11 @@ case "current-inventory":
           receivedDate: '',
           quantityOnHand: 0,
           administeredDoses: 0
-        }));
+        })), "commercialName", "asc");
         reportTitle = "Vaccine Inventory Template";
         break;
       default:
-        reportData = vaccines;
+        reportData = sortVaccines(vaccines, "commercialName", "asc");
         reportTitle = "Vaccine Inventory Report";
     }
     return { data: reportData, title: reportTitle };
