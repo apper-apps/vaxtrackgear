@@ -92,9 +92,9 @@ case "current-inventory":
         reportTitle = "Orders Report - Low/Out of Stock";
         break;
       case "vaccines-to-order":
-        const { getVaccinesToOrder } = await import("@/utils/vaccineUtils");
+const { getVaccinesToOrder } = await import("@/utils/vaccineUtils");
         reportData = sortVaccines(getVaccinesToOrder(vaccines), "commercialName", "asc");
-        reportTitle = "Vaccines to Order (Less than 6 units)";
+        reportTitle = "Vaccines to Order (Less than 7 units)";
         break;
       case "administration-summary":
         reportData = sortVaccines(vaccines.filter(vaccine => vaccine.administeredDoses > 0), "commercialName", "asc");

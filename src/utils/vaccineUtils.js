@@ -123,7 +123,7 @@ export const aggregateVaccinesByName = (vaccines) => {
 return Array.from(aggregatedMap.values());
 };
 
-export const getVaccinesToOrder = (vaccines, threshold = 6) => {
+export const getVaccinesToOrder = (vaccines, threshold = 7) => {
   // Aggregate vaccines by commercial name to get total quantities
   const aggregatedVaccines = aggregateVaccinesByName(vaccines);
   
