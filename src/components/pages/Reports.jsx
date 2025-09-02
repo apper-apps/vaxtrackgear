@@ -11,8 +11,7 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
 import { formatDate, getExpirationStatus } from "@/utils/dateUtils";
-import { aggregateVaccinesByName, getStockStatus } from "@/utils/vaccineUtils";
-
+import { aggregateVaccinesByName, getStockStatus, sortVaccines } from "@/utils/vaccineUtils";
 const Reports = () => {
   const [vaccines, setVaccines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,8 +53,8 @@ const generateReport = async () => {
     let reportTitle = "";
     
 switch (reportType) {
-      case "current-inventory":
-        reportData = vaccines;
+case "current-inventory":
+        reportData = sortVaccines(vaccines, "commercialName", "asc");
         reportTitle = "Current Inventory Report";
         break;
       case "expiring-soon":
