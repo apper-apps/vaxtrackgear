@@ -91,6 +91,11 @@ case "current-inventory":
         }), "commercialName", "asc");
         reportTitle = "Orders Report - Low/Out of Stock";
         break;
+      case "vaccines-to-order":
+        const { getVaccinesToOrder } = await import("@/utils/vaccineUtils");
+        reportData = sortVaccines(getVaccinesToOrder(vaccines), "commercialName", "asc");
+        reportTitle = "Vaccines to Order (Less than 6 units)";
+        break;
       case "administration-summary":
         reportData = sortVaccines(vaccines.filter(vaccine => vaccine.administeredDoses > 0), "commercialName", "asc");
         reportTitle = "Administration Summary Report";
@@ -352,12 +357,13 @@ const isOrdersReport = reportType === "orders";
               onChange={(e) => setReportType(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
             >
-              <option value="current-inventory">Current Inventory</option>
+<option value="current-inventory">Current Inventory</option>
               <option value="expiring-soon">Expiring Soon (30 Days)</option>
               <option value="expired">Expired Vaccines</option>
               <option value="low-stock">Low Stock Alert</option>
               <option value="out-of-stock">Out of Stock Report</option>
               <option value="orders">Orders</option>
+              <option value="vaccines-to-order">Vaccines to Order</option>
               <option value="administration-summary">Administration Summary</option>
               <option value="vaccine-inventory-template">Vaccine Inventory Template</option>
             </select>

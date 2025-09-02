@@ -120,7 +120,15 @@ export const aggregateVaccinesByName = (vaccines) => {
     }
   });
   
-  return Array.from(aggregatedMap.values());
+return Array.from(aggregatedMap.values());
+};
+
+export const getVaccinesToOrder = (vaccines, threshold = 6) => {
+  // Aggregate vaccines by commercial name to get total quantities
+  const aggregatedVaccines = aggregateVaccinesByName(vaccines);
+  
+  // Filter for vaccines with total quantity less than the threshold
+  return aggregatedVaccines.filter(vaccine => vaccine.quantityOnHand < threshold);
 };
 
 export const formatVaccineDisplayName = (vaccine) => {
