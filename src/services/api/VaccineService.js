@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-import React from "react";
 
 export const VaccineService = {
   async getAll() {
@@ -37,9 +36,9 @@ pagingInfo: {
       };
       
       const response = await apperClient.fetchRecords("vaccine_c", params);
-      if (!response || !response.data || response.data.length === 0) {
-        console.error("Error fetching vaccines:", response.message);
-        toast.error(response.message);
+if (!response || !response.data || response.data.length === 0) {
+        console.error("Error fetching vaccines:", response?.message || "No data received");
+        toast.error(response?.message || "Failed to load vaccines");
         return [];
       }
 
@@ -80,8 +79,8 @@ pagingInfo: {
       
       const response = await apperClient.getRecordById("vaccine_c", parseInt(id), params);
       if (!response || !response.data) {
-        console.error(`Error fetching vaccine with ID ${id}:`, response.message);
-        toast.error(response.message);
+console.error(`Error fetching vaccine with ID ${id}:`, response?.message || "No data received");
+        toast.error(response?.message || "Failed to load vaccine");
         return null;
       }
 
@@ -123,7 +122,7 @@ const params = {
       const response = await apperClient.createRecord("vaccine_c", params);
       
       // Handle response
-      if (!response || !response.success) {
+if (!response || !response.success) {
         console.error("Error creating vaccine:", response?.message || "Unknown error");
         toast.error(response?.message || "Failed to create vaccine");
         return null;
@@ -183,9 +182,9 @@ const updateData = {
 
       const response = await apperClient.updateRecord("vaccine_c", params);
 
-      if (!response.success) {
-        console.error(`Error updating vaccine with ID ${id}:`, response.message);
-        toast.error(response.message);
+if (!response.success) {
+        console.error(`Error updating vaccine with ID ${id}:`, response?.message || "Update failed");
+        toast.error(response?.message || "Failed to update vaccine");
         return null;
       }
 
@@ -231,7 +230,7 @@ const params = {
       const response = await apperClient.deleteRecord("vaccine_c", params);
       
       // Handle response
-      if (!response || !response.success) {
+if (!response || !response.success) {
         console.error(`Error deleting vaccine with ID ${id}:`, response?.message || "Unknown error");
         toast.error(response?.message || "Failed to delete vaccine");
         return false;
@@ -330,8 +329,8 @@ fieldName: "commercialName_c",
       };
       
       const response = await apperClient.fetchRecords("vaccine_c", params);
-      if (!response || !response.data || response.data.length === 0) {
-        console.error("Error searching vaccines:", response.message);
+if (!response || !response.data || response.data.length === 0) {
+        console.error("Error searching vaccines:", response?.message || "No search results");
         return [];
       }
 
