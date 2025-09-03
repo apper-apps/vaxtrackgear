@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import ApperIcon from "@/components/ApperIcon";
-import TableHeader from "@/components/molecules/TableHeader";
-import Badge from "@/components/atoms/Badge";
-import Input from "@/components/atoms/Input";
-import Button from "@/components/atoms/Button";
-import Card from "@/components/atoms/Card";
-import { cn } from "@/utils/cn";
 import { formatDate, getDaysUntilExpiration, getExpirationStatus } from "@/utils/dateUtils";
 import { getStockStatus } from "@/utils/vaccineUtils";
+import { cn } from "@/utils/cn";
+import ApperIcon from "@/components/ApperIcon";
+import TableHeader from "@/components/molecules/TableHeader";
+import Input from "@/components/atoms/Input";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
 
 const VaccineTable = ({ 
   vaccines = [], 
@@ -45,11 +45,11 @@ const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
     });
   };
 
-  const handleFieldChange = (vaccineId, fieldName, value) => {
+const handleFieldChange = (vaccineId, fieldName, value) => {
     const fieldKey = `${vaccineId}-${fieldName}`;
     
     let processedValue = value;
-    if (fieldName === 'quantityOnHand') {
+    if (fieldName === 'quantityOnHand_c') {
       processedValue = parseInt(value) || 0;
     }
     
@@ -63,13 +63,18 @@ const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
     const fieldKey = `${vaccine.Id}-${fieldName}`;
     const newValue = fieldEdits[fieldKey];
     
+    if (newValue === undefined || newValue === null || newValue === '') {
+      toast.error("Please enter a value");
+      return;
+    }
+    
     // Field-specific validation
-    if (fieldName === 'quantityOnHand' && newValue < 0) {
+    if (fieldName === 'quantityOnHand_c' && newValue < 0) {
       toast.error("Quantity cannot be negative");
       return;
     }
     
-    if ((fieldName === 'expirationDate' || fieldName === 'receivedDate') && newValue) {
+    if ((fieldName === 'expirationDate_c' || fieldName === 'receivedDate_c') && newValue) {
       try {
         new Date(newValue).toISOString();
       } catch (error) {
@@ -91,10 +96,10 @@ const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
     });
     
     const fieldLabels = {
-      'lotNumber': 'lot number',
-      'expirationDate': 'expiration date', 
-      'receivedDate': 'received date',
-      'quantityOnHand': 'quantity'
+      'lotNumber_c': 'lot number',
+      'expirationDate_c': 'expiration date', 
+      'receivedDate_c': 'received date',
+      'quantityOnHand_c': 'quantity'
     };
     
     toast.success(`Updated ${fieldLabels[fieldName]} for ${vaccine.commercialName}`);
@@ -116,7 +121,7 @@ const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
 
   const getFieldValue = (vaccineId, fieldName) => {
     const fieldKey = `${vaccineId}-${fieldName}`;
-    return fieldEdits[fieldKey];
+    return fieldEdits[fieldKey] !== undefined ? fieldEdits[fieldKey] : '';
   };
 
   const handlePasswordSubmit = () => {
@@ -173,23 +178,21 @@ const columns = [
       [vaccineId]: numValue
     }));
   };
-
-  const handleAdminister = (vaccine) => {
+const handleAdminister = async (vaccine) => {
     const dosesToAdmin = adminDoses[vaccine.Id] || 0;
-    
     if (dosesToAdmin <= 0) {
       toast.error("Please enter a valid number of doses to administer");
       return;
     }
     
-    if (dosesToAdmin > vaccine.quantityOnHand) {
+    if (dosesToAdmin > vaccine.quantityOnHand_c) {
       toast.error("Cannot administer more doses than available in stock");
       return;
     }
 
     const updatedVaccine = {
       ...vaccine,
-      quantityOnHand: vaccine.quantityOnHand - dosesToAdmin,
+      quantityOnHand_c: vaccine.quantityOnHand_c - dosesToAdmin,
       administeredDoses: (vaccine.administeredDoses || 0) + dosesToAdmin
     };
 
@@ -198,7 +201,6 @@ const columns = [
       ...prev,
       [vaccine.Id]: 0
     }));
-    
     toast.success(`Successfully administered ${dosesToAdmin} doses of ${vaccine.commercialName}`);
   };
 
@@ -245,7 +247,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
   return (
     <Card className={cn("overflow-hidden", className)}>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 medical-table">
+<table className="min-w-full divide-y divide-gray-200 medical-table">
           <TableHeader 
             columns={columns}
             sortBy={sortBy}
@@ -254,7 +256,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
           />
           <tbody className="bg-white divide-y divide-gray-200">
 {sortedVaccines.map((vaccine) => (
-              <tr key={vaccine.Id} className="group hover:bg-gray-50 transition-colors duration-150">
+              <tr key={vaccine.Id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-medium text-gray-900">
                     {vaccine.commercialName}
@@ -262,146 +264,146 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                   {vaccine.genericName}
-                </td>
-<td className="px-6 py-4 whitespace-nowrap font-mono text-sm">
-                  {isFieldEditing(vaccine.Id, 'lotNumber') ? (
+</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'lotNumber_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
                         type="text"
-                        value={getFieldValue(vaccine.Id, 'lotNumber')}
-                        onChange={(e) => handleFieldChange(vaccine.Id, 'lotNumber', e.target.value)}
+                        value={getFieldValue(vaccine.Id, 'lotNumber_c')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'lotNumber_c', e.target.value)}
                         className="w-32 text-sm"
                         size="sm"
                       />
                       <Button
                         variant="accent"
                         size="sm"
-                        onClick={() => handleSaveField(vaccine, 'lotNumber')}
+                        onClick={() => handleSaveField(vaccine, 'lotNumber_c')}
                       >
                         <ApperIcon name="Check" className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCancelField(vaccine.Id, 'lotNumber')}
+                        onClick={() => handleCancelField(vaccine.Id, 'lotNumber_c')}
                       >
                         <ApperIcon name="X" className="h-3 w-3" />
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2 group">
-                      <span className="text-gray-600">{vaccine.lotNumber}</span>
+                      <span className="text-gray-600">{vaccine.lotNumber_c}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFieldEdit(vaccine.Id, 'lotNumber', vaccine.lotNumber)}
+                        onClick={() => handleFieldEdit(vaccine.Id, 'lotNumber_c', vaccine.lotNumber_c)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ApperIcon name="Edit2" className="h-3 w-3" />
                       </Button>
                     </div>
                   )}
-                </td>
-<td className="px-6 py-4 whitespace-nowrap">
-                  {isFieldEditing(vaccine.Id, 'expirationDate') ? (
+</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'expirationDate_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
                         type="date"
-                        value={getFieldValue(vaccine.Id, 'expirationDate')}
-                        onChange={(e) => handleFieldChange(vaccine.Id, 'expirationDate', e.target.value)}
+                        value={getFieldValue(vaccine.Id, 'expirationDate_c')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'expirationDate_c', e.target.value)}
                         className="w-36 text-sm"
                         size="sm"
                       />
                       <Button
                         variant="accent"
                         size="sm"
-                        onClick={() => handleSaveField(vaccine, 'expirationDate')}
+                        onClick={() => handleSaveField(vaccine, 'expirationDate_c')}
                       >
                         <ApperIcon name="Check" className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCancelField(vaccine.Id, 'expirationDate')}
+                        onClick={() => handleCancelField(vaccine.Id, 'expirationDate_c')}
                       >
                         <ApperIcon name="X" className="h-3 w-3" />
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2 group">
-                      <span className="text-gray-600">{formatDate(vaccine.expirationDate)}</span>
+                      <span className="text-gray-600">{formatDate(vaccine.expirationDate_c)}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFieldEdit(vaccine.Id, 'expirationDate', vaccine.expirationDate)}
+                        onClick={() => handleFieldEdit(vaccine.Id, 'expirationDate_c', vaccine.expirationDate_c)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ApperIcon name="Edit2" className="h-3 w-3" />
                       </Button>
                     </div>
                   )}
-                </td>
-<td className="px-6 py-4 whitespace-nowrap">
-                  {isFieldEditing(vaccine.Id, 'receivedDate') ? (
+</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {isFieldEditing(vaccine.Id, 'receivedDate_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
                         type="date"
-                        value={getFieldValue(vaccine.Id, 'receivedDate')}
-                        onChange={(e) => handleFieldChange(vaccine.Id, 'receivedDate', e.target.value)}
+                        value={getFieldValue(vaccine.Id, 'receivedDate_c')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'receivedDate_c', e.target.value)}
                         className="w-36 text-sm"
                         size="sm"
                       />
                       <Button
                         variant="accent"
                         size="sm"
-                        onClick={() => handleSaveField(vaccine, 'receivedDate')}
+                        onClick={() => handleSaveField(vaccine, 'receivedDate_c')}
                       >
                         <ApperIcon name="Check" className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCancelField(vaccine.Id, 'receivedDate')}
+                        onClick={() => handleCancelField(vaccine.Id, 'receivedDate_c')}
                       >
                         <ApperIcon name="X" className="h-3 w-3" />
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2 group">
-                      <span className="text-gray-600">{formatDate(vaccine.receivedDate)}</span>
+                      <span className="text-gray-600">{formatDate(vaccine.receivedDate_c)}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFieldEdit(vaccine.Id, 'receivedDate', vaccine.receivedDate)}
+                        onClick={() => handleFieldEdit(vaccine.Id, 'receivedDate_c', vaccine.receivedDate_c)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ApperIcon name="Edit2" className="h-3 w-3" />
                       </Button>
                     </div>
-                  )}
-                </td>
+</td>
+                
 <td className="px-6 py-4 whitespace-nowrap">
-                  {isFieldEditing(vaccine.Id, 'quantityOnHand') ? (
+                  {isFieldEditing(vaccine.Id, 'quantityOnHand_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
                         type="number"
                         min="0"
-                        value={getFieldValue(vaccine.Id, 'quantityOnHand')}
-                        onChange={(e) => handleFieldChange(vaccine.Id, 'quantityOnHand', e.target.value)}
+                        value={getFieldValue(vaccine.Id, 'quantityOnHand_c')}
+                        onChange={(e) => handleFieldChange(vaccine.Id, 'quantityOnHand_c', e.target.value)}
                         className="w-20 text-center"
                         size="sm"
                       />
                       <Button
                         variant="accent"
                         size="sm"
-                        onClick={() => handleSaveField(vaccine, 'quantityOnHand')}
+                        onClick={() => handleSaveField(vaccine, 'quantityOnHand_c')}
                       >
                         <ApperIcon name="Check" className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCancelField(vaccine.Id, 'quantityOnHand')}
+                        onClick={() => handleCancelField(vaccine.Id, 'quantityOnHand_c')}
                       >
                         <ApperIcon name="X" className="h-3 w-3" />
                       </Button>
@@ -410,15 +412,15 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                     <div className="flex items-center space-x-2 group">
                       <span className={cn(
                         "font-medium",
-                        vaccine.quantityOnHand === 0 ? "text-red-600" :
-                        vaccine.quantityOnHand <= 5 ? "text-orange-600" : "text-green-600"
+                        vaccine.quantityOnHand_c === 0 ? "text-red-600" :
+                        vaccine.quantityOnHand_c <= 5 ? "text-orange-600" : "text-green-600"
                       )}>
-                        {vaccine.quantityOnHand}
+                        {vaccine.quantityOnHand_c}
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFieldEdit(vaccine.Id, 'quantityOnHand', vaccine.quantityOnHand)}
+                        onClick={() => handleFieldEdit(vaccine.Id, 'quantityOnHand_c', vaccine.quantityOnHand_c)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ApperIcon name="Edit2" className="h-3 w-3" />
@@ -426,17 +428,15 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                     </div>
                   )}
 </td>
-                {showAdministration && (
+{showAdministration && (
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {vaccine.quantityOnHand > 0 ? (
+                    {vaccine.quantityOnHand_c > 0 ? (
                       <div className="flex items-center space-x-2">
                         <Input
                           type="number"
                           min="0"
-                          max={vaccine.quantityOnHand}
                           value={adminDoses[vaccine.Id] || ""}
                           onChange={(e) => handleAdminChange(vaccine.Id, e.target.value)}
-                          placeholder="0"
                           className="w-20 text-center"
                           size="sm"
                         />

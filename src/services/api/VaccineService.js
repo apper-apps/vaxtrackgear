@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import React from "react";
 
 export const VaccineService = {
   async getAll() {
@@ -29,15 +30,14 @@ export const VaccineService = {
             sorttype: "ASC"
           }
         ],
-        pagingInfo: {
+pagingInfo: {
           limit: 100,
           offset: 0
         }
       };
-
-      const response = await apperClient.fetchRecords("vaccine", params);
-
-      if (!response.success) {
+      
+      const response = await apperClient.fetchRecords("vaccine_c", params);
+      if (!response || !response.data || response.data.length === 0) {
         console.error("Error fetching vaccines:", response.message);
         toast.error(response.message);
         return [];
@@ -75,12 +75,11 @@ export const VaccineService = {
           { field: { Name: "receivedDate" } },
           { field: { Name: "quantityOnHand" } },
           { field: { Name: "administeredDoses" } }
-        ]
+]
       };
-
-      const response = await apperClient.getRecordById("vaccine", parseInt(id), params);
-
-      if (!response.success) {
+      
+      const response = await apperClient.getRecordById("vaccine_c", parseInt(id), params);
+      if (!response || !response.data) {
         console.error(`Error fetching vaccine with ID ${id}:`, response.message);
         toast.error(response.message);
         return null;
@@ -117,15 +116,16 @@ export const VaccineService = {
         administeredDoses: parseInt(vaccineData.administeredDoses || 0)
       };
 
-      const params = {
+const params = {
         records: [createData]
       };
-
-      const response = await apperClient.createRecord("vaccine", params);
-
-      if (!response.success) {
-        console.error("Error creating vaccine:", response.message);
-        toast.error(response.message);
+      
+      const response = await apperClient.createRecord("vaccine_c", params);
+      
+      // Handle response
+      if (!response || !response.success) {
+        console.error("Error creating vaccine:", response?.message || "Unknown error");
+        toast.error(response?.message || "Failed to create vaccine");
         return null;
       }
 
@@ -164,7 +164,7 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-      // Only include Updateable fields for update operation
+// Only include fields that are being updated
       const updateData = {
         Id: parseInt(id),
         ...(updatedData.commercialName !== undefined && { commercialName: updatedData.commercialName }),
@@ -181,7 +181,7 @@ export const VaccineService = {
         records: [updateData]
       };
 
-      const response = await apperClient.updateRecord("vaccine", params);
+      const response = await apperClient.updateRecord("vaccine_c", params);
 
       if (!response.success) {
         console.error(`Error updating vaccine with ID ${id}:`, response.message);
@@ -224,15 +224,16 @@ export const VaccineService = {
         apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
       });
 
-      const params = {
+const params = {
         RecordIds: [parseInt(id)]
       };
-
-      const response = await apperClient.deleteRecord("vaccine", params);
-
-      if (!response.success) {
-        console.error(`Error deleting vaccine with ID ${id}:`, response.message);
-        toast.error(response.message);
+      
+      const response = await apperClient.deleteRecord("vaccine_c", params);
+      
+      // Handle response
+      if (!response || !response.success) {
+        console.error(`Error deleting vaccine with ID ${id}:`, response?.message || "Unknown error");
+        toast.error(response?.message || "Failed to delete vaccine");
         return false;
       }
 
@@ -257,8 +258,8 @@ export const VaccineService = {
         console.error(`Error deleting vaccine with ID ${id}:`, error.message);
       }
       return false;
-    }
-},
+}
+  },
 
   async searchByName(searchTerm) {
     try {
@@ -325,12 +326,11 @@ export const VaccineService = {
         pagingInfo: {
           limit: 20,
           offset: 0
-        }
+}
       };
-
-      const response = await apperClient.fetchRecords("vaccine", params);
-
-      if (!response.success) {
+      
+      const response = await apperClient.fetchRecords("vaccine_c", params);
+      if (!response || !response.data || response.data.length === 0) {
         console.error("Error searching vaccines:", response.message);
         return [];
       }

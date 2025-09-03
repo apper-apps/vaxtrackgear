@@ -1,5 +1,3 @@
-import React from "react";
-import Error from "@/components/ui/Error";
 export const getStockStatus = (quantityOnHand, lowStockThreshold = 5) => {
   if (quantityOnHand === 0) return "out-of-stock";
   if (quantityOnHand <= lowStockThreshold) return "low-stock";
@@ -111,7 +109,6 @@ export const aggregateVaccinesByName = (vaccines) => {
       existing.administeredDoses += vaccine.administeredDoses || 0;
     } else {
       aggregatedMap.set(key, {
-        Id: vaccine.Id, // Include Id for compatibility with AlertBanner
         commercialName: vaccine.commercialName,
         genericName: vaccine.genericName,
         quantityOnHand: vaccine.quantityOnHand || 0,
@@ -120,7 +117,7 @@ export const aggregateVaccinesByName = (vaccines) => {
     }
   });
   
-return Array.from(aggregatedMap.values());
+  return Array.from(aggregatedMap.values());
 };
 
 export const getVaccinesToOrder = (vaccines, threshold = 7) => {

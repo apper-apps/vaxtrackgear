@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
-import SearchBar from "@/components/molecules/SearchBar";
-import VaccineTable from "@/components/organisms/VaccineTable";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
-import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
 import { VaccineService } from "@/services/api/VaccineService";
 import { formatDate, getExpirationStatus } from "@/utils/dateUtils";
-import { getStockStatus } from "@/utils/vaccineUtils";
+import { exportVaccinesToCSV, getStockStatus } from "@/utils/vaccineUtils";
+import ApperIcon from "@/components/ApperIcon";
+import VaccineTable from "@/components/organisms/VaccineTable";
+import SearchBar from "@/components/molecules/SearchBar";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
 
 const Inventory = () => {
   const [vaccines, setVaccines] = useState([]);
@@ -53,13 +53,19 @@ try {
     );
     
     setFilteredVaccines(filtered);
-  };
+};
 
-  const handleUpdateVaccine = async (updatedVaccine) => {
-try {
+  const handleUpdateVaccine = async (vaccineId, quantity) => {
+    try {
+      const updatedVaccine = {
+        ...vaccines.find(v => v.Id === vaccineId),
+        quantityOnHand: quantity
+      };
+      
       await VaccineService.update(updatedVaccine.Id, updatedVaccine);
       
-      const updatedVaccines = vaccines.map(vaccine => 
+      // Update local state
+      const updatedVaccines = vaccines.map(vaccine =>
         vaccine.Id === updatedVaccine.Id ? updatedVaccine : vaccine
       );
       
@@ -76,8 +82,12 @@ try {
           vaccine.lotNumber?.toLowerCase().includes(searchTerm)
         ) : vaccinesWithStock
       );
+      
+      toast.success("Vaccine quantity updated successfully!");
     } catch (err) {
-setError("Failed to update vaccine. Please try again.");
+      console.error("Error updating vaccine:", err);
+      setError("Failed to update vaccine. Please try again.");
+      toast.error("Failed to update vaccine. Please try again.");
     }
   };
 
@@ -202,6 +212,7 @@ const handleExportCSV = async () => {
       toast.error("Failed to export CSV. Please try again.");
     }
   };
+
   useEffect(() => {
     loadVaccines();
   }, []);
