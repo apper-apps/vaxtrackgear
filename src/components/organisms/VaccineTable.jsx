@@ -343,7 +343,7 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                     </div>
                   )}
 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+<td className="px-6 py-4 whitespace-nowrap">
                   {isFieldEditing(vaccine.Id, 'receivedDate_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
@@ -380,9 +380,10 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
                         <ApperIcon name="Edit2" className="h-3 w-3" />
                       </Button>
                     </div>
-</td>
+                  )}
+                </td>
                 
-<td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   {isFieldEditing(vaccine.Id, 'quantityOnHand_c') ? (
                     <div className="flex items-center space-x-2">
                       <Input
