@@ -26,7 +26,7 @@ const Inventory = () => {
 try {
       const data = await VaccineService.getAll();
       // Filter out vaccines with zero quantity on hand
-      const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand > 0);
+const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand_c > 0);
       const vaccinesWithStock = filterVaccinesWithStock(data);
       setVaccines(vaccinesWithStock);
       setFilteredVaccines(vaccinesWithStock);
@@ -46,10 +46,10 @@ try {
       return;
     }
     
-    const filtered = vaccines.filter(vaccine => 
-      vaccine.commercialName?.toLowerCase().includes(term) ||
-      vaccine.genericName?.toLowerCase().includes(term) ||
-      vaccine.lotNumber?.toLowerCase().includes(term)
+const filtered = vaccines.filter(vaccine => 
+      vaccine.commercialName_c?.toLowerCase().includes(term) ||
+      vaccine.genericName_c?.toLowerCase().includes(term) ||
+      vaccine.lotNumber_c?.toLowerCase().includes(term)
     );
     
     setFilteredVaccines(filtered);
@@ -58,8 +58,8 @@ try {
   const handleUpdateVaccine = async (vaccineId, quantity) => {
     try {
       const updatedVaccine = {
-        ...vaccines.find(v => v.Id === vaccineId),
-        quantityOnHand: quantity
+...vaccines.find(v => v.Id === vaccineId),
+        quantityOnHand_c: quantity
       };
       
       await VaccineService.update(updatedVaccine.Id, updatedVaccine);
@@ -70,16 +70,16 @@ try {
       );
       
       // Filter out vaccines with zero quantity on hand
-      const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand > 0);
+const filterVaccinesWithStock = (vaccines) => vaccines.filter(vaccine => vaccine.quantityOnHand_c > 0);
       const vaccinesWithStock = filterVaccinesWithStock(updatedVaccines);
       
       setVaccines(vaccinesWithStock);
       setFilteredVaccines(
         searchTerm ? 
-        vaccinesWithStock.filter(vaccine => 
-          vaccine.commercialName?.toLowerCase().includes(searchTerm) ||
-          vaccine.genericName?.toLowerCase().includes(searchTerm) ||
-          vaccine.lotNumber?.toLowerCase().includes(searchTerm)
+vaccinesWithStock.filter(vaccine => 
+          vaccine.commercialName_c?.toLowerCase().includes(searchTerm) ||
+          vaccine.genericName_c?.toLowerCase().includes(searchTerm) ||
+          vaccine.lotNumber_c?.toLowerCase().includes(searchTerm)
         ) : vaccinesWithStock
       );
       
@@ -163,12 +163,12 @@ try {
 
         xPosition = margin;
         const rowData = [
-          vaccine.commercialName || vaccine.Name,
-          vaccine.genericName || "",
-          vaccine.lotNumber || "",
-          vaccine.quantityOnHand?.toString() || "0",
-          vaccine.administeredDoses?.toString() || "0",
-          vaccine.expirationDate ? formatDate(vaccine.expirationDate) : "",
+vaccine.commercialName_c || vaccine.Name,
+          vaccine.genericName_c || "",
+          vaccine.lotNumber_c || "",
+          vaccine.quantityOnHand_c?.toString() || "0",
+          vaccine.administeredDoses_c?.toString() || "0",
+          vaccine.expirationDate_c ? formatDate(vaccine.expirationDate_c) : "",
           getStockStatus(vaccine)
         ];
 

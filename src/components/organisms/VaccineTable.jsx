@@ -16,7 +16,7 @@ const VaccineTable = ({
   showAdministration = false,
   className 
 }) => {
-const [sortBy, setSortBy] = useState("commercialName");
+const [sortBy, setSortBy] = useState("commercialName_c");
   const [sortOrder, setSortOrder] = useState("asc");
   const [adminDoses, setAdminDoses] = useState({});
 const [fieldEdits, setFieldEdits] = useState({});
@@ -30,10 +30,10 @@ const [fieldEdits, setFieldEdits] = useState({});
   const [passwordInput, setPasswordInput] = useState('');
 const handleFieldEdit = (vaccineId, fieldName, currentValue) => {
     const fieldLabels = {
-      'lotNumber': 'Lot Number',
-      'expirationDate': 'Expiration Date', 
-      'receivedDate': 'Received Date',
-      'quantityOnHand': 'Quantity On Hand'
+'lotNumber_c': 'Lot Number',
+      'expirationDate_c': 'Expiration Date', 
+      'receivedDate_c': 'Received Date',
+      'quantityOnHand_c': 'Quantity On Hand'
     };
 
     setPasswordPrompt({
@@ -157,12 +157,12 @@ const handleFieldChange = (vaccineId, fieldName, value) => {
     setPasswordInput('');
   };
 const columns = [
-    { key: "commercialName", label: "Vaccine Name", sortable: true },
-    { key: "genericName", label: "Generic Name", sortable: true },
-    { key: "lotNumber", label: "Lot Number", sortable: true },
-    { key: "expirationDate", label: "Expiration Date", sortable: true },
-    { key: "receivedDate", label: "Received Date", sortable: true },
-    { key: "quantityOnHand", label: "Quantity On Hand", sortable: true },
+    { key: "commercialName_c", label: "Vaccine Name", sortable: true },
+    { key: "genericName_c", label: "Generic Name", sortable: true },
+    { key: "lotNumber_c", label: "Lot Number", sortable: true },
+    { key: "expirationDate_c", label: "Expiration Date", sortable: true },
+    { key: "receivedDate_c", label: "Received Date", sortable: true },
+    { key: "quantityOnHand_c", label: "Quantity On Hand", sortable: true },
     ...(showAdministration ? [{ key: "administration", label: "Administer", sortable: false }] : [])
   ];
 
@@ -190,10 +190,10 @@ const handleAdminister = async (vaccine) => {
       return;
     }
 
-    const updatedVaccine = {
+const updatedVaccine = {
       ...vaccine,
       quantityOnHand_c: vaccine.quantityOnHand_c - dosesToAdmin,
-      administeredDoses: (vaccine.administeredDoses || 0) + dosesToAdmin
+      administeredDoses_c: (vaccine.administeredDoses_c || 0) + dosesToAdmin
     };
 
     onUpdateVaccine(updatedVaccine);
@@ -226,10 +226,9 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
     }
   });
 
-  const getStatusBadge = (vaccine) => {
-    const expirationStatus = getExpirationStatus(vaccine.expirationDate);
-    const stockStatus = getStockStatus(vaccine.quantityOnHand);
-    
+const getStatusBadge = (vaccine) => {
+    const expirationStatus = getExpirationStatus(vaccine.expirationDate_c);
+    const stockStatus = getStockStatus(vaccine.quantityOnHand_c);
     if (expirationStatus === "expired") {
       return <Badge variant="expired">Expired</Badge>;
     } else if (expirationStatus === "expiring") {
@@ -256,14 +255,14 @@ const sortedVaccines = [...vaccines].sort((a, b) => {
           />
           <tbody className="bg-white divide-y divide-gray-200">
 {sortedVaccines.map((vaccine) => (
-              <tr key={vaccine.Id} className="hover:bg-gray-50">
+<tr key={vaccine.Id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-medium text-gray-900">
-                    {vaccine.commercialName}
+                    {vaccine.commercialName_c}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                  {vaccine.genericName}
+                  {vaccine.genericName_c}
 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {isFieldEditing(vaccine.Id, 'lotNumber_c') ? (

@@ -11,18 +11,18 @@ export const VaccineService = {
       });
 
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "Tags" } },
           { field: { Name: "Owner" } },
-          { field: { Name: "commercialName" } },
-          { field: { Name: "genericName" } },
-          { field: { Name: "lotNumber" } },
-          { field: { Name: "quantity" } },
-          { field: { Name: "expirationDate" } },
-          { field: { Name: "receivedDate" } },
-          { field: { Name: "quantityOnHand" } },
-          { field: { Name: "administeredDoses" } }
+          { field: { Name: "commercialName_c" } },
+          { field: { Name: "genericName_c" } },
+          { field: { Name: "lotNumber_c" } },
+          { field: { Name: "quantity_c" } },
+          { field: { Name: "expirationDate_c" } },
+          { field: { Name: "receivedDate_c" } },
+          { field: { Name: "quantityOnHand_c" } },
+          { field: { Name: "administeredDoses_c" } }
         ],
         orderBy: [
           {
@@ -64,17 +64,17 @@ pagingInfo: {
 
       const params = {
         fields: [
-          { field: { Name: "Name" } },
+{ field: { Name: "Name" } },
           { field: { Name: "Tags" } },
           { field: { Name: "Owner" } },
-          { field: { Name: "commercialName" } },
-          { field: { Name: "genericName" } },
-          { field: { Name: "lotNumber" } },
-          { field: { Name: "quantity" } },
-          { field: { Name: "expirationDate" } },
-          { field: { Name: "receivedDate" } },
-          { field: { Name: "quantityOnHand" } },
-          { field: { Name: "administeredDoses" } }
+          { field: { Name: "commercialName_c" } },
+          { field: { Name: "genericName_c" } },
+          { field: { Name: "lotNumber_c" } },
+          { field: { Name: "quantity_c" } },
+          { field: { Name: "expirationDate_c" } },
+          { field: { Name: "receivedDate_c" } },
+          { field: { Name: "quantityOnHand_c" } },
+          { field: { Name: "administeredDoses_c" } }
 ]
       };
       
@@ -106,14 +106,14 @@ pagingInfo: {
 
       // Only include Updateable fields for create operation
       const createData = {
-        commercialName: vaccineData.commercialName,
-        genericName: vaccineData.genericName,
-        lotNumber: vaccineData.lotNumber,
-        quantity: parseInt(vaccineData.quantity),
-        expirationDate: vaccineData.expirationDate,
-        receivedDate: vaccineData.receivedDate,
-        quantityOnHand: parseInt(vaccineData.quantityOnHand),
-        administeredDoses: parseInt(vaccineData.administeredDoses || 0)
+commercialName_c: vaccineData.commercialName,
+        genericName_c: vaccineData.genericName,
+        lotNumber_c: vaccineData.lotNumber,
+        quantity_c: parseInt(vaccineData.quantity),
+        expirationDate_c: vaccineData.expirationDate,
+        receivedDate_c: vaccineData.receivedDate,
+        quantityOnHand_c: parseInt(vaccineData.quantityOnHand),
+        administeredDoses_c: parseInt(vaccineData.administeredDoses || 0)
       };
 
 const params = {
@@ -165,16 +165,16 @@ const params = {
       });
 
 // Only include fields that are being updated
-      const updateData = {
+const updateData = {
         Id: parseInt(id),
-        ...(updatedData.commercialName !== undefined && { commercialName: updatedData.commercialName }),
-        ...(updatedData.genericName !== undefined && { genericName: updatedData.genericName }),
-        ...(updatedData.lotNumber !== undefined && { lotNumber: updatedData.lotNumber }),
-        ...(updatedData.quantity !== undefined && { quantity: parseInt(updatedData.quantity) }),
-        ...(updatedData.expirationDate !== undefined && { expirationDate: updatedData.expirationDate }),
-        ...(updatedData.receivedDate !== undefined && { receivedDate: updatedData.receivedDate }),
-        ...(updatedData.quantityOnHand !== undefined && { quantityOnHand: parseInt(updatedData.quantityOnHand) }),
-        ...(updatedData.administeredDoses !== undefined && { administeredDoses: parseInt(updatedData.administeredDoses) })
+        ...(updatedData.commercialName !== undefined && { commercialName_c: updatedData.commercialName }),
+        ...(updatedData.genericName !== undefined && { genericName_c: updatedData.genericName }),
+        ...(updatedData.lotNumber !== undefined && { lotNumber_c: updatedData.lotNumber }),
+        ...(updatedData.quantity !== undefined && { quantity_c: parseInt(updatedData.quantity) }),
+        ...(updatedData.expirationDate !== undefined && { expirationDate_c: updatedData.expirationDate }),
+        ...(updatedData.receivedDate !== undefined && { receivedDate_c: updatedData.receivedDate }),
+        ...(updatedData.quantityOnHand !== undefined && { quantityOnHand_c: parseInt(updatedData.quantityOnHand) }),
+        ...(updatedData.administeredDoses !== undefined && { administeredDoses_c: parseInt(updatedData.administeredDoses) })
       };
 
       const params = {
@@ -275,14 +275,14 @@ const params = {
 
       const params = {
         fields: [
-          { field: { Name: "Name" } },
-          { field: { Name: "commercialName" } },
-          { field: { Name: "genericName" } },
-          { field: { Name: "quantityOnHand" } }
+{ field: { Name: "Name" } },
+          { field: { Name: "commercialName_c" } },
+          { field: { Name: "genericName_c" } },
+          { field: { Name: "quantityOnHand_c" } }
         ],
         where: [
-          {
-            FieldName: "commercialName",
+{
+            FieldName: "commercialName_c",
             Operator: "Contains",
             Values: [searchTerm],
             Include: true
@@ -295,7 +295,7 @@ const params = {
               {
                 conditions: [
                   {
-                    fieldName: "commercialName",
+                    fieldName: "commercialName_c",
                     operator: "Contains",
                     subOperator: "",
                     values: [searchTerm]
@@ -306,7 +306,7 @@ const params = {
               {
                 conditions: [
                   {
-                    fieldName: "genericName",
+                    fieldName: "genericName_c",
                     operator: "Contains",
                     subOperator: "",
                     values: [searchTerm]
@@ -319,7 +319,7 @@ const params = {
         ],
         orderBy: [
           {
-            fieldName: "commercialName",
+fieldName: "commercialName_c",
             sorttype: "ASC"
           }
         ],
